@@ -1,0 +1,55 @@
+{% extends 'hub/hub_base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2>Parcels - Main HUB View</h2>
+
+  {% if parcels %}
+  <table class="table table-bordered table-hover">
+    <thead class="thead-dark">
+      <tr>
+        <th>Tracking Number</th>
+        <th>Sender</th>
+        <th>Recipient</th>
+        <th>Status</th>
+        <th>Assigned Branch</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for parcel in parcels %}
+      <tr>
+        <td>{{ parcel.tracking_number }}</td>
+        <td>{{ parcel.sender }}</td>
+        <td>{{ parcel.recipient }}</td>
+        <td>{{ parcel.status }}</td>
+        <td>{% if parcel.assigned_branch %}{{ parcel.assigned_branch.name }}{% else %}Not Assigned{% endif %}</td>
+        <td>
+          <a href="{% url 'assign_parcel' parcel.id %}" class="btn btn-sm btn-primary">
+            Assign to Branch
+          </a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="pagination mt-3">
+    {% if parcels.has_previous %}
+      <a href="?page=1" class="btn btn-outline-secondary btn-sm">First</a>
+      <a href="?page={{ parcels.previous_page_number }}" class="btn btn-outline-secondary btn-sm">Previous</a>
+    {% endif %}
+
+    <span class="mx-2">Page {{ parcels.number }} of {{ parcels.paginator.num_pages }}</span>
+
+    {% if parcels.has_next %}
+      <a href="?page={{ parcels.next_page_number }}" class="btn btn-outline-secondary btn-sm">Next</a>
+      <a href="?page={{ parcels.paginator.num_pages }}" class="btn btn-outline-secondary btn-sm">Last</a>
+    {% endif %}
+  </div>
+
+  {% else %}
+    <p>No parcels available.</p>
+  {% endif %}
+</div>
+{% endblock %}

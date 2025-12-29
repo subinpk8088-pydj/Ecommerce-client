@@ -1,0 +1,153 @@
+{% extends 'hub/hub_base.html' %}
+{% load static %}
+{% block content %}
+
+<!-- Google Fonts & Custom Styling -->
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap');
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background-color: #f9f7fc;
+  }
+
+  .page-title {
+    color: #7c5295;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    animation: fadeIn 1s ease;
+  }
+
+  .card {
+    border: none;
+    border-radius: 1rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background-color: #ffffff;
+  }
+
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+  }
+
+  .card-title {
+    color: #7c5295;
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+
+  .btn-purple {
+    background-color: #7c5295;
+    color: white;
+  }
+
+  .btn-purple:hover {
+    background-color: #68427e;
+  }
+
+  @keyframes fadeIn {
+    from {opacity: 0; transform: translateY(20px);}
+    to {opacity: 1; transform: translateY(0);}
+  }
+
+  .branch-card {
+    animation: fadeIn 0.8s ease;
+    margin-bottom: 1.5rem;
+  }
+
+</style>
+
+<div class="container py-5">
+  <h2 class="page-title text-center">Manage HUB Branches</h2>
+
+  {% if branches %}
+    <div class="row">
+      {% for branch in branches %}
+        <div class="col-md-6 col-lg-4 branch-card">
+          <div class="card p-3">
+            <div class="card-body">
+              <h5 class="card-title">{{ branch.name }}</h5>
+              <p class="card-text">
+<strong>Address:</strong> {{ branch.address }}<br>
+<strong>Phone:</strong> {{ branch.phone }}<br>
+<strong>City:</strong> {{ branch.city }}, {{ branch.state }}<br>
+
+              </p>
+              <div class="d-flex justify-content-between">
+                <!-- <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editModal{{ branch.id }}">Edit</button>
+                <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ branch.id }}">Delete</button> -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+      <!-- Edit Modal -->
+<div class="modal fade" id="editModal{{ branch.id }}" tabindex="-1" aria-labelledby="editModalLabel{{ branch.id }}" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content rounded-3">
+      <div class="modal-header bg-light">
+        <h5 class="modal-title" id="editModalLabel{{ branch.id }}">Edit Branch - {{ branch.name }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form method="POST" action="{% url 'edit_branch' branch.id %}">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Name</label>
+            <input type="text" name="name" class="form-control" value="{{ branch.name }}" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Location</label>
+            <input type="text" name="location" class="form-control" value="{{ branch.location }}" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Contact Number</label>
+            <input type="text" name="contact_number" class="form-control" value="{{ branch.contact_number }}" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" name="email" class="form-control" value="{{ branch.email }}" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-purple">Save Changes</button>
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+        <!-- Delete Modal -->
+        <div class="modal fade" id="deleteModal{{ branch.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ branch.id }}" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content rounded-3">
+              <div class="modal-header bg-light">
+                <h5 class="modal-title" id="deleteModalLabel{{ branch.id }}">Delete Branch</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              </div>
+              <div class="modal-body">
+                Are you sure you want to delete <strong>{{ branch.name }}</strong>?
+              </div>
+              <div class="modal-footer">
+                <form method="POST" action="{% url 'delete_branch' branch.id %}">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                </form>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="alert alert-info text-center mt-5">
+      No HUB branches added yet.
+    </div>
+  {% endif %}
+</div>
+
+{% endblock %}

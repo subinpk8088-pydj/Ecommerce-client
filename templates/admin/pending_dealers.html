@@ -1,0 +1,133 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+
+{% block content %}
+<br><br>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  body {
+    font-family: 'Nunito', sans-serif;
+    background-color: #f9f6fc;
+  }
+  .container-fluid {
+    padding-top: 2rem;
+  }
+  h2 {
+    color: #7c5295;
+    font-weight: 700;
+    animation: fadeInDown 1s ease-out;
+  }
+  .card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(124, 82, 149, 0.1);
+    animation: slideUp 0.6s ease-in-out;
+  }
+  .card-body {
+    padding: 2rem;
+  }
+  .table thead {
+    background-color: #7c5295;
+    color: white;
+  }
+  .table td, .table th {
+    vertical-align: middle;
+  }
+  .table-striped tbody tr:nth-of-type(odd) {
+    background-color: #f3ecf8;
+  }
+  .btn-success {
+    background-color: #7c5295;
+    border-color: #7c5295;
+  }
+  .btn-success:hover {
+    background-color: #684383;
+    border-color: #684383;
+  }
+  .alert {
+    border-radius: 12px;
+    animation: fadeIn 0.6s ease-in-out;
+  }
+  .alert-info {
+    background-color: #efe2f6;
+    color: #7c5295;
+  }
+
+  @keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* Hover row effect */
+  .table-hover tbody tr:hover {
+    background-color: #e8d9f0;
+  }
+</style>
+
+<div class="container-fluid">
+  <h2 class="mb-4">Pending Dealer Approvals</h2>
+  
+  {% if messages %}
+    <div class="messages">
+      {% for message in messages %}
+        <div class="alert alert-{% if message.tags == 'success' %}success{% else %}danger{% endif %} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+  
+  {% if pending_dealers %}
+    <div class="card">
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover table-striped align-middle">
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Date Registered</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for dealer in pending_dealers %}
+                <tr>
+                  <td>{{ dealer.username }}</td>
+                  <td>{{ dealer.first_name }} {{ dealer.last_name }}</td>
+                  <td>{{ dealer.email }}</td>
+                  <td>{{ dealer.phone_number }}</td>
+                  <td>{{ dealer.date_joined|date:"M d, Y" }}</td>
+                  <td>
+                    <a href="{% url 'approve_dealer' dealer.id %}" 
+                       class="btn btn-success btn-sm"
+                       onclick="return confirm('Are you sure you want to approve this dealer? An email with login credentials will be sent.')">
+                      Approve
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <div class="alert alert-info mt-3">No pending dealer approvals.</div>
+  {% endif %}
+</div>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{% endblock %}

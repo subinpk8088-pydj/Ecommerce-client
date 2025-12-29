@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+{% if messages %}
+  <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+    {% for message in messages %}
+      <div class="toast show custom-toast align-items-center text-white shadow fade-in-slide" role="alert">
+        <div class="d-flex">
+          <div class="toast-body">
+            <i class="bi bi-check-circle-fill me-2"></i> {{ message }}
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<!-- Custom Styling -->
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap');
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(135deg, #f7f0fa, #f4e4f7);
+    min-height: 100vh;
+  }
+
+  .login-container {
+    max-width: 450px;
+    margin: 6% auto;
+    background: #fff;
+    padding: 35px;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(124, 82, 149, 0.2);
+    animation: fadeInUp 1s ease;
+  }
+
+  .login-container h2 {
+    font-weight: 700;
+    margin-bottom: 30px;
+    color: #7c5295;
+    text-align: center;
+  }
+
+  .form-label {
+    color: #5e5c63;
+    font-weight: 600;
+  }
+
+  .form-control {
+    border-radius: 8px;
+    border: 1px solid #d4c4e3;
+    transition: 0.3s;
+  }
+
+  .form-control:focus {
+    border-color: #7c5295;
+    box-shadow: 0 0 5px rgba(124, 82, 149, 0.4);
+  }
+
+  .btn-login {
+    background-color: #7c5295;
+    color: white;
+    font-weight: bold;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+  }
+
+  .btn-login:hover {
+    background-color: #684285;
+  }
+
+  .form-check-label {
+    color: #6e6a75;
+  }
+
+  .login-links {
+    margin-top: 20px;
+    text-align: center;
+  }
+
+  .login-links a {
+    color: #7c5295;
+    text-decoration: none;
+    font-weight: 600;
+    transition: 0.3s;
+  }
+
+  .login-links a:hover {
+    text-decoration: underline;
+    color: #5f3f78;
+  }
+
+  .alert-danger {
+    font-size: 0.9rem;
+    border-radius: 8px;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Toast Styling */
+  .custom-toast {
+    background-color: #7c5295;
+    border-left: 4px solid #f4e4f7;
+    border-radius: 0.75rem;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.95rem;
+    animation: slideInTopRight 0.7s ease forwards;
+  }
+
+  @keyframes slideInTopRight {
+    0% {
+      opacity: 0;
+      transform: translate(30px, -20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translate(0, 0);
+    }
+  }
+</style>
+
+<!-- Login Form -->
+<div class="login-container" data-aos="fade-up">
+  <h2>Login</h2>
+  <form method="post" action="{% url 'login' %}">
+    {% csrf_token %}
+
+    {% if form.errors %}
+      {% if form.errors|length > 1 %}
+        <div class="alert alert-danger">Please correct the errors below.</div>
+      {% else %}
+        <div class="alert alert-danger">Please correct the error below.</div>
+      {% endif %}
+    {% endif %}
+
+    <div class="mb-3">
+      <label for="id_username" class="form-label">Username/Email</label>
+      <input type="text" name="username" class="form-control" id="id_username" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="id_password" class="form-label">Password</label>
+      <input type="password" name="password" class="form-control" id="id_password" required>
+    </div>
+
+    <div class="mb-3 form-check">
+      <input type="checkbox" class="form-check-input" id="rememberMe">
+      <label class="form-check-label" for="rememberMe">Remember me</label>
+    </div>
+
+    <button type="submit" class="btn btn-login">Login</button>
+  </form>
+
+  <div class="login-links mt-3">
+    <p><a href="#">Forgot password?</a></p>
+    <p>Don't have an account? <a href="#">Sign up</a></p>
+  </div>
+</div>
+{% endblock %}

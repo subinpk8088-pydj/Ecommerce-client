@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+
+<!-- AOS CSS -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+<!-- AOS JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+<script>
+  AOS.init({ once: true, duration: 1000 });
+</script>
+
+<style>
+  body {
+    font-family: 'Nunito', sans-serif;
+    background-color: #fefbfd;
+    color: #444;
+  }
+
+  .blog-section {
+    background: #faf4fb;
+    padding: 60px 0;
+  }
+
+  .blog-title {
+    font-size: 36px;
+    font-weight: 700;
+    color: #7c5295;
+    border-bottom: 4px solid #7c5295;
+    display: inline-block;
+    margin-bottom: 40px;
+    padding-bottom: 8px;
+  }
+
+  .blog-card {
+    background: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(124, 82, 149, 0.15);
+    transition: all 0.4s ease-in-out;
+  }
+
+  .blog-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(124, 82, 149, 0.2);
+  }
+
+  .blog-img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+  }
+
+  .blog-content {
+    padding: 20px;
+  }
+
+  .blog-meta {
+    font-size: 14px;
+    color: #a08fb1;
+    margin-bottom: 10px;
+  }
+
+  .blog-meta i {
+    color: #7c5295;
+    margin-right: 5px;
+  }
+
+  .blog-heading {
+    font-size: 20px;
+    font-weight: 600;
+    color: #3a2c4b;
+    margin-bottom: 10px;
+    transition: color 0.3s;
+  }
+
+  .blog-heading:hover {
+    color: #7c5295;
+  }
+
+  .blog-description {
+    color: #6e5a7a;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+</style>
+
+<section class="blog-section" data-aos="fade-up">
+  <div class="container">
+    <h2 class="text-center blog-title">Latest Blog Posts</h2>
+    <div class="row">
+      <!-- Blog Cards (same as before) -->
+      <!-- Blog 1 -->
+      <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="100">
+        <div class="blog-card">
+          <img src="{% static 'images/Health-And-Hygiene.png' %}" alt="Blog 1" class="blog-img">
+          <div class="blog-content">
+            <div class="blog-meta"><i class="bi bi-calendar-event"></i> May 8, 2025 • Health & Hygiene</div>
+            <div class="blog-heading">Top 5 Hygiene Habits for a Healthier Life Happier Life</div>
+            <p class="blog-description">
+              Discover the essential hygiene practices that easly can drastically improve your everyday well-being day by day. These small habits make a big impact!
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Blog 2 -->
+      <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="200">
+        <div class="blog-card">
+          <img src="{% static 'images/sustainability.png' %}" alt="Blog 2" class="blog-img">
+          <div class="blog-content">
+            <div class="blog-meta"><i class="bi bi-calendar-event"></i> April 20, 2025 • Sustainability</div>
+            <div class="blog-heading">Eco-Friendly Hygiene: Small Steps, Big Difference</div>
+            <p class="blog-description">
+              Learn how to switch to sustainable hygiene products and reduce your carbon footprint without compromising on cleanliness.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Blog 3 -->
+      <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="300">
+        <div class="blog-card">
+          <img src="{% static 'images/Skin-Care.jpg' %}" alt="Blog 3" class="blog-img">
+          <div class="blog-content">
+            <div class="blog-meta"><i class="bi bi-calendar-event"></i> April 5, 2025 • Skin Care</div>
+            <div class="blog-heading">Choosing the Right Products for Sensitive Skin</div>
+            <p class="blog-description">
+              If you struggle with sensitive skin, here's what to look for in your hygiene products to avoid irritation and inflammation.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Blog 4 -->
+      <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="400">
+        <div class="blog-card">
+          <img src="{% static 'images/wellness.png' %}" alt="Blog 4" class="blog-img">
+          <div class="blog-content">
+            <div class="blog-meta"><i class="bi bi-calendar-event"></i> March 15, 2025 • Wellness</div>
+            <div class="blog-heading">The Role of Personal Hygiene in Mental Health</div>
+            <p class="blog-description">
+              Good hygiene can have a powerful effect on mental well-being. Learn how daily routines can boost your mood and confidence.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Blog 5 -->
+      <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="500">
+        <div class="blog-card">
+          <img src="{% static 'images/big-family.jpg' %}" alt="Blog 5" class="blog-img">
+          <div class="blog-content">
+            <div class="blog-meta"><i class="bi bi-calendar-event"></i> March 1, 2025 • Family</div>
+            <div class="blog-heading">Hygiene Education for Kids: Fun & Effective</div>
+            <p class="blog-description">
+              Teaching kids about hygiene doesn't have to be boring. Here's how to turn hygiene education into a fun family activity.
+            </p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+{% endblock %}

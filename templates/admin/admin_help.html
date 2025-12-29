@@ -1,0 +1,128 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;600&display=swap');
+
+  
+
+    .help-header {
+        color: #7c5295;
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+        animation: fadeIn 1s ease-in-out;
+    }
+
+    .card-help {
+        border: none;
+        border-radius: 1.25rem;
+        box-shadow: 0 4px 20px rgba(124, 82, 149, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        background-color: #fff;
+        animation: fadeUp 0.6s ease-in-out;
+    }
+
+    .card-help:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 24px rgba(124, 82, 149, 0.15);
+    }
+
+    .card-help .card-title {
+        color: #7c5295;
+        font-weight: 600;
+    }
+
+    .btn-purple {
+        background-color: #7c5295;
+        color: #fff;
+        border-radius: 20px;
+    }
+
+    .btn-purple:hover {
+        background-color: #68427f;
+    }
+
+    @keyframes fadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+</style>
+
+<div class="container mt-4">
+    <h2 class="help-header">Help Center</h2>
+
+    <div class="row g-4">
+        <div class="col-md-6 col-lg-4">
+            <div class="card card-help p-3">
+                <div class="card-body">
+                    <h5 class="card-title">How to Add a Product</h5>
+                    <p class="card-text">Learn how to add new products, including name, category, price, and images.</p>
+                    <button class="btn btn-purple" data-bs-toggle="modal" data-bs-target="#addProductModal">Learn More</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+            <div class="card card-help p-3">
+                <div class="card-body">
+                    <h5 class="card-title">Managing Categories</h5>
+                    <p class="card-text">Steps to create, update, and delete product categories.</p>
+                    <button class="btn btn-purple" data-bs-toggle="modal" data-bs-target="#manageCategoriesModal">Learn More</button>
+                </div>
+            </div>
+        </div>
+        <!-- Add more cards as needed -->
+    </div>
+</div>
+
+<!-- Modal: Add Product Help -->
+<div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addProductModalLabel">How to Add a Product</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        1. Go to "Add Product" from the sidebar.<br>
+        2. Fill in product name, price, quantity, and select a category.<br>
+        3. Upload an image if desired.<br>
+        4. Click "Save" to add the product.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Manage Categories -->
+<div class="modal fade" id="manageCategoriesModal" tabindex="-1" aria-labelledby="manageCategoriesModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4">
+      <div class="modal-header">
+        <h5 class="modal-title" id="manageCategoriesModalLabel">Managing Categories</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        1. Navigate to "Categories" in the admin panel.<br>
+        2. Click "Add Category" to create a new one.<br>
+        3. Use the edit or delete buttons for existing categories.
+      </div>
+    </div>
+  </div>
+</div>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{% endblock %}

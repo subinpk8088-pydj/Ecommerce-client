@@ -1,0 +1,583 @@
+{% extends 'hub/hub_base.html' %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-color: #7c5295;
+        --primary-light: #a078b8;
+        --primary-dark: #5a3e6b;
+        --secondary-color: #f8f4fc;
+        --accent-color: #e8d9f0;
+        --text-dark: #2c2c54;
+        --text-muted: #6c757d;
+        --shadow-light: 0 2px 15px rgba(124, 82, 149, 0.1);
+        --shadow-medium: 0 4px 25px rgba(124, 82, 149, 0.15);
+        --shadow-hover: 0 8px 35px rgba(124, 82, 149, 0.2);
+    }
+
+    body {
+        font-family: 'Nunito', sans-serif;
+        background: linear-gradient(135deg, #f8f4fc 0%, #e8d9f0 100%);
+        color: var(--text-dark);
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    /* Header Styles */
+    .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        animation: fadeInDown 0.8s ease-out;
+    }
+
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 4px rgba(124, 82, 149, 0.1);
+    }
+
+    .page-subtitle {
+        font-size: 1.1rem;
+        color: var(--text-muted);
+        font-weight: 400;
+    }
+
+    /* Alert Styles */
+    .custom-alert {
+        border: none;
+        border-radius: 15px;
+        padding: 1rem 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow-light);
+        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        border-left: 4px solid #28a745;
+        animation: slideInLeft 0.6s ease-out;
+    }
+
+    .custom-alert .btn-close {
+        background: none;
+        border: none;
+        font-size: 1.2rem;
+        opacity: 0.6;
+        transition: opacity 0.3s ease;
+    }
+
+    .custom-alert .btn-close:hover {
+        opacity: 1;
+    }
+
+    /* Card Styles */
+    .order-card {
+        background: white;
+        border-radius: 20px;
+        padding: 1.8rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--shadow-light);
+        transition: all 0.3s ease;
+        border: 1px solid rgba(124, 82, 149, 0.1);
+        animation: fadeInUp 0.6s ease-out;
+        animation-fill-mode: both;
+    }
+
+    .order-card:hover {
+        box-shadow: var(--shadow-hover);
+        transform: translateY(-5px);
+    }
+
+    .order-card:nth-child(even) {
+        animation-delay: 0.1s;
+    }
+
+    .order-card:nth-child(odd) {
+        animation-delay: 0.2s;
+    }
+
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--accent-color);
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+
+    .user-avatar {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    .user-details h5 {
+        margin: 0;
+        color: var(--text-dark);
+        font-weight: 600;
+    }
+
+    .user-details .text-muted {
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    /* Status Badge Styles */
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border: none;
+        box-shadow: var(--shadow-light);
+    }
+
+    .status-processing {
+        background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+        color: #e17055;
+    }
+
+    .status-assigned_to_branch {
+        background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+        color: white;
+    }
+
+    .status-assigned_to_agent {
+        background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-color) 100%);
+        color: white;
+    }
+
+    .status-delivered {
+        background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+        color: white;
+    }
+
+    .status-default {
+        background: linear-gradient(135deg, #ddd 0%, #bbb 100%);
+        color: #666;
+    }
+
+    /* Card Body Styles */
+    .card-body {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+    }
+
+    .info-label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .info-value {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+
+    .price-value {
+        color: var(--primary-color);
+        font-size: 1.3rem;
+        font-weight: 700;
+    }
+
+    /* Action Section */
+    .card-actions {
+        padding-top: 1rem;
+        border-top: 1px solid var(--accent-color);
+    }
+
+    .action-form {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .form-select {
+        border: 2px solid var(--accent-color);
+        border-radius: 10px;
+        padding: 0.6rem 1rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        background: white;
+        min-width: 200px;
+        flex: 1;
+    }
+
+    .form-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(124, 82, 149, 0.25);
+        outline: none;
+    }
+
+    .btn-modern {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+        border: none;
+        color: white;
+        padding: 0.7rem 1.5rem;
+        border-radius: 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-light);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.85rem;
+    }
+
+    .btn-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+    }
+
+    .assignment-info {
+        margin-top: 1rem;
+        padding: 0.8rem;
+        background: var(--secondary-color);
+        border-radius: 10px;
+        border-left: 4px solid var(--primary-color);
+    }
+
+    .assignment-info small {
+        display: block;
+        margin-bottom: 0.2rem;
+        font-weight: 600;
+    }
+
+    /* Pagination Styles */
+    .modern-pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 3rem;
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    .pagination-btn {
+        padding: 0.8rem 1.5rem;
+        background: white;
+        border: 2px solid var(--accent-color);
+        border-radius: 25px;
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-light);
+    }
+
+    .pagination-btn:hover {
+        background: var(--primary-color);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+    }
+
+    .pagination-current {
+        padding: 0.8rem 1.5rem;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+        color: white;
+        border-radius: 25px;
+        font-weight: 700;
+        box-shadow: var(--shadow-medium);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: var(--primary-light);
+        margin-bottom: 1.5rem;
+    }
+
+    .empty-state h4 {
+        color: var(--text-dark);
+        margin-bottom: 1rem;
+    }
+
+    .empty-state p {
+        color: var(--text-muted);
+        font-size: 1.1rem;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .container {
+            padding: 1rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+        }
+
+        .card-body {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .action-form {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0.8rem;
+        }
+
+        .form-select {
+            min-width: unset;
+            width: 100%;
+            padding: 0.8rem 1rem;
+            font-size: 1rem;
+        }
+
+        .btn-modern {
+            width: 100%;
+            text-align: center;
+            padding: 0.8rem 1.5rem;
+        }
+
+        .card-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .order-card {
+            padding: 1.5rem;
+        }
+
+        .modern-pagination {
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .pagination-btn,
+        .pagination-current {
+            padding: 0.6rem 1rem;
+            font-size: 0.9rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .page-title {
+            font-size: 1.8rem;
+        }
+
+        .order-card {
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            font-size: 1rem;
+        }
+
+        .status-badge {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+        }
+
+        .info-value {
+            font-size: 1rem;
+        }
+
+        .price-value {
+            font-size: 1.2rem;
+        }
+    }
+</style>
+
+<div class="container mt-4">
+    <div class="page-header">
+        <h1 class="page-title">📦 All Orders</h1>
+        <p class="page-subtitle">Hub Management Dashboard</p>
+    </div>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div class="custom-alert" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                {{ message }}
+                <button type="button" class="btn-close float-end" data-bs-dismiss="alert" aria-label="Close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        {% endfor %}
+    {% endif %}
+    
+    {% if purchases %}
+        <div class="orders-container">
+            {% for item in purchases %}
+                <div class="order-card">
+                    <div class="card-header">
+                        <div class="user-info">
+                            <div class="user-avatar">
+                                {{ item.user.username|first|upper }}
+                            </div>
+                            <div class="user-details">
+                                <h5>{{ item.user.username }}</h5>
+                                <p class="text-muted">{{ item.date_bought|date:"M d, Y H:i" }}</p>
+                            </div>
+                        </div>
+                        <div class="status-badge status-{{ item.status }}">
+                            {{ item.get_status_display }}
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="info-item">
+                            <span class="info-label">Product</span>
+                            <span class="info-value">{{ item.product.name }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Total Price</span>
+                            <span class="info-value price-value">₹{{ item.get_total_price_with_gst }}</span>
+                        </div>
+                    </div>
+
+                    <div class="card-actions">
+                        {% if item.status == 'processing' or item.status == 'at_hub' %}
+                            <form method="post" class="action-form">
+                                {% csrf_token %}
+                                <input type="hidden" name="purchase_id" value="{{ item.id }}">
+                                <input type="hidden" name="action" value="assign_to_branch">
+                                
+                                <select name="branch_id" class="form-select" required>
+                                    <option value="">🏢 Select Branch</option>
+                                    {% for branch in branches %}
+                                        <option value="{{ branch.id }}">{{ branch.name }}</option>
+                                    {% endfor %}
+                                </select>
+                                
+                                <button type="submit" class="btn-modern">
+                                    <i class="fas fa-paper-plane me-1"></i>
+                                    Assign to Branch
+                                </button>
+                            </form>
+                        {% else %}
+                            <div class="text-muted">
+                                <i class="fas fa-lock me-1"></i>
+                                No actions available
+                            </div>
+                        {% endif %}
+
+                        {% if item.assigned_branch or item.assigned_delivery_agent %}
+                            <div class="assignment-info">
+                                {% if item.assigned_branch %}
+                                    <small class="text-info">
+                                        <i class="fas fa-building me-1"></i>
+                                        Branch: {{ item.assigned_branch.name }}
+                                    </small>
+                                {% endif %}
+                                {% if item.assigned_delivery_agent %}
+                                    <small class="text-primary">
+                                        <i class="fas fa-user me-1"></i>
+                                        Agent: {{ item.assigned_delivery_agent.name }}
+                                    </small>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <div class="modern-pagination">
+            {% if purchases.has_previous %}
+                <a href="?page=1" class="pagination-btn">
+                    <i class="fas fa-angle-double-left me-1"></i>
+                    First
+                </a>
+                <a href="?page={{ purchases.previous_page_number }}" class="pagination-btn">
+                    <i class="fas fa-angle-left me-1"></i>
+                    Previous
+                </a>
+            {% endif %}
+            
+            <span class="pagination-current">
+                Page {{ purchases.number }} of {{ purchases.paginator.num_pages }}
+            </span>
+            
+            {% if purchases.has_next %}
+                <a href="?page={{ purchases.next_page_number }}" class="pagination-btn">
+                    Next
+                    <i class="fas fa-angle-right ms-1"></i>
+                </a>
+                <a href="?page={{ purchases.paginator.num_pages }}" class="pagination-btn">
+                    Last
+                    <i class="fas fa-angle-double-right ms-1"></i>
+                </a>
+            {% endif %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <h4>No Orders Found</h4>
+            <p>There are currently no purchases to display.</p>
+        </div>
+    {% endif %}
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

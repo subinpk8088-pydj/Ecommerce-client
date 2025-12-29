@@ -1,0 +1,128 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+{% block content %}
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+  body {
+    font-family: 'Nunito', sans-serif;
+    background-color: #f9f5fc;
+  }
+
+  .container {
+    animation: fadeIn 0.8s ease-in-out;
+  }
+
+  h3 {
+    color: #7c5295;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  .table {
+    background-color: #fff;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 8px 20px rgba(124, 82, 149, 0.1);
+    animation: slideUp 1s ease;
+  }
+
+  .table th {
+    background-color: #7c5295;
+    color: white;
+    border: none;
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  .table td {
+    vertical-align: middle;
+    text-align: center;
+    border-color: #e4d9ef;
+  }
+
+  .btn-success {
+    background-color: #7c5295;
+    border-color: #7c5295;
+    border-radius: 8px;
+    padding: 5px 12px;
+    font-weight: 600;
+  }
+
+  .btn-success:hover {
+    background-color: #6a4782;
+    border-color: #6a4782;
+  }
+
+  img {
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(124, 82, 149, 0.15);
+    transition: transform 0.3s ease;
+  }
+
+  img:hover {
+    transform: scale(1.05);
+  }
+
+  .text-muted {
+    font-style: italic;
+    color: #aaa !important;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+
+<div class="container mt-5">
+  <h3>Return Requests</h3>
+  <div class="table-responsive">
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Product</th>
+          <th>Reason</th>
+          <th>Proof</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for req in requests %}
+        <tr>
+          <td>{{ req.user.username }}</td>
+          <td>{{ req.product_name }}</td>
+          <td>{{ req.reason }}</td>
+          <td>
+            <img src="{{ req.proof_image.url }}" alt="Proof Image" width="100">
+          </td>
+          <td>
+            <span class="badge {% if req.status == 'Pending' %}bg-warning{% elif req.status == 'Approved' %}bg-success{% else %}bg-secondary{% endif %}">
+              {{ req.status }}
+            </span>
+          </td>
+          <td>
+            {% if req.status == "Pending" %}
+              <a href="{% url 'approve_return' req.id %}" class="btn btn-success btn-sm">Approve</a>
+            {% else %}
+              <span class="text-muted">Already {{ req.status }}</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{% endblock %}

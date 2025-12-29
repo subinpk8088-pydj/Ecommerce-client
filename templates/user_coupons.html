@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Google Font -->
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  body {
+    font-family: 'Nunito', sans-serif;
+    background-color: #f8f9fa;
+  }
+  .coupon-card {
+    border: 1px solid #e0d6f5;
+    border-left: 6px solid #7c5295;
+    border-radius: 1rem;
+    box-shadow: 0 8px 16px rgba(124, 82, 149, 0.15);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background: #fff;
+    animation: fadeInUp 0.6s ease both;
+  }
+  .coupon-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(124, 82, 149, 0.2);
+  }
+  .coupon-header {
+    color: #7c5295;
+    font-weight: 600;
+  }
+  .badge-success {
+    background-color: #7c5295 !important;
+  }
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Additional styles for copy button */
+  .copy-btn {
+    border: none;
+    background: none;
+    color: #7c5295;
+    cursor: pointer;
+    margin-left: 5px;
+  }
+
+  .copy-success {
+    color: green;
+    font-size: 0.8rem;
+    margin-left: 8px;
+  }
+</style>
+
+
+<div class="container mt-5">
+  <h3 class="mb-4 text-center coupon-header">🎁 My Coupons</h3>
+
+  {% if coupons %}
+    <div class="row">
+      {% for uc in coupons %}
+        <div class="col-md-4 mb-4 d-flex align-items-stretch">
+          <div class="coupon-card p-4 w-100">
+            <h5 class="mb-1">{{ uc.coupon.name }}</h5>
+            <h6 class="text-muted mb-2">
+              Code: 
+              <code id="code-{{ uc.id }}">{{ uc.coupon.code }}</code>
+              <button class="copy-btn" onclick="copyCode('{{ uc.id }}')" title="Copy to clipboard">
+                <i class="fas fa-copy"></i>
+              </button>
+              <span id="copy-msg-{{ uc.id }}" class="copy-success d-none">Copied!</span>
+            </h6>
+            <p class="mb-1">Discount: <strong>1{{ uc.coupon.discount_percent }}%</strong></p>
+            <p class="mb-2 text-muted small">Valid: {{ uc.coupon.start_date }} → {{ uc.coupon.end_date }}</p>
+            {% if uc.is_used %}
+              <span class="badge bg-secondary">Used</span>
+            {% else %}
+              <span class="badge badge-success">Active</span>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="alert alert-info text-center shadow-sm rounded">You don't have any coupons yet.</div>
+  {% endif %}
+</div>
+
+<style>
+  .coupon-card {
+    position: relative;
+    border: none;
+    border-radius: 1rem;
+    background: linear-gradient(135deg, #f3ecfa, #fdfbff);
+    box-shadow: 0 8px 20px rgba(124, 82, 149, 0.15);
+    padding: 1.5rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    animation: slideUp 0.6s ease both;
+  }
+
+  .coupon-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 24px rgba(124, 82, 149, 0.2);
+  }
+
+  .coupon-card::before,
+  .coupon-card::after {
+    content: "";
+    position: absolute;
+    width: 20px;
+    height: 40px;
+    background: #fff;
+    border-radius: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+  }
+
+  .coupon-card::before {
+    left: -10px;
+  }
+
+  .coupon-card::after {
+    right: -10px;
+  }
+
+  .coupon-header {
+    color: #7c5295;
+    font-weight: 700;
+    font-size: 1.2rem;
+  }
+
+  .badge-success {
+    background-color: #7c5295 !important;
+  }
+
+  @keyframes slideUp {
+    0% {
+      opacity: 0;
+      transform: translateY(40px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>
+
+<script>
+  function copyCode(id) {
+    const code = document.getElementById('code-' + id).innerText;
+    const msg = document.getElementById('copy-msg-' + id);
+
+    navigator.clipboard.writeText(code).then(function () {
+      msg.classList.remove('d-none');
+      setTimeout(() => msg.classList.add('d-none'), 1500);
+    });
+  }
+</script>
+{% endblock %}

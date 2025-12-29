@@ -1,0 +1,499 @@
+<!-- base.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Admin Dashboard{% endblock %}</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <!-- Google Fonts - Nunito -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Color Palette Variables - Matching Category Management Page */
+        :root {
+            --primary: #7c5295;        /* Soft purple - main brand color */
+            --primary-light: #a17eb6;
+            --secondary: #e882a6;      /* Soft pink - secondary brand color */
+            --secondary-light: #ffd3e2;
+            --accent: #5cc6d0;         /* Teal - accent color */
+            --neutral-light: #f4f6f9;
+            --neutral: #e9ecef;
+            --text-dark: #495057;
+            --text-light: #6c757d;
+            --success: #4caf93;
+            --warning: #ffb347;
+            --danger: #f67280;
+            --white: #ffffff;
+        }
+
+        /* Base Styling */
+        body {
+            font-family: 'Nunito', 'Segoe UI', sans-serif;
+            background-color: var(--neutral-light);
+            color: var(--text-dark);
+        }
+
+        /* Navbar Styling */
+        .navbar {
+            background-color: var(--primary) !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1040;
+            padding: 0.8rem 1rem;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: white !important;
+        }
+
+        .nav-link {
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .navbar .btn-outline-light {
+            border-radius: 8px;
+            padding: 0.375rem 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .navbar .btn-outline-light:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(255, 255, 255, 0.2);
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            position: fixed;
+            top: 70px; /* height of navbar */
+            left: 0;
+            height: calc(100% - 62px);
+            width: 250px;
+            background-color: white;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+            padding-top: 1.5rem;
+            transition: transform 0.3s ease-in-out;
+            z-index: 1030;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 0 1.5rem 1.5rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--neutral);
+        }
+
+        .sidebar-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0;
+        }
+
+        .sidebar .nav-item {
+            margin-bottom: 0.3rem;
+        }
+
+        .sidebar .nav-link {
+            color: var(--text-dark);
+            padding: 0.75rem 1.5rem;
+            border-radius: 0;
+            display: flex;
+            align-items: center;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .sidebar .nav-link:hover {
+            background-color: var(--neutral-light);
+            color: var(--primary);
+            transform: translateX(5px);
+        }
+
+        .sidebar .nav-link.active {
+            background-color: var(--primary-light);
+            color: white;
+        }
+
+        .sidebar .bi {
+            margin-right: 12px;
+            font-size: 1.1rem;
+        }
+
+        .sidebar-collapsed {
+            transform: translateX(-100%);
+        }
+
+        /* Main Content Area */
+        .content {
+            margin-left: 250px;
+            padding: 80px 30px 30px;
+            transition: margin-left 0.3s ease-in-out;
+            min-height: 100vh;
+        }
+
+        .content-expanded {
+            margin-left: 0;
+        }
+
+        /* Toggle Button */
+        .toggle-sidebar-btn {
+            background-color: transparent;
+            border: none;
+            color: white;
+            font-size: 1.3rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .toggle-sidebar-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Footer */
+        .footer {
+            background-color: white;
+            padding: 1rem;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-light);
+            border-top: 1px solid var(--neutral);
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+                box-shadow: none;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+                box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            }
+
+            .content {
+                margin-left: 0;
+            }
+        }
+
+        /* Card Styling - Matching Category Management */
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            background-color: var(--primary);
+            color: white;
+            border-bottom: none;
+            padding: 1.25rem 1.5rem;
+            font-weight: 600;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        /* Button Styling */
+        .btn-primary {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            border-radius: 8px;
+            padding: 0.5rem 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover, .btn-primary:focus {
+            background-color: var(--primary-light);
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(124, 82, 149, 0.3);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.8s ease forwards;
+        }
+
+        .slide-in {
+            animation: slideIn 0.8s ease forwards;
+        }
+
+        .slide-up {
+            animation: slideUp 0.8s ease forwards;
+        }
+
+        /* User Info Dropdown */
+        .user-info {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background-color: var(--secondary-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .user-name {
+            color: white;
+        }
+
+        /* Page Header */
+        .page-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 3px solid var(--primary-light);
+        }
+
+        .page-header h2 {
+            color: var(--primary);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Top Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container-fluid">
+            <button class="toggle-sidebar-btn me-2" id="toggleSidebar">
+                <i class="bi bi-list"></i>
+            </button>
+            <a class="navbar-brand slide-in" href="{% url 'admin_dashboard' %}">
+                <i class="bi bi-shield-check me-2"></i>Admin Panel
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item dropdown">
+                        <!-- <a href="#" class="nav-link dropdown-toggle text-white" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"> -->
+                            <div class="user-info">
+                                <div class="user-avatar">
+                                    {{ user.username|first|upper }}
+                                </div>
+                                <span class="user-name">{{ user.username }}</span>
+                            </div>
+                        </a>
+                       
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <div class="sidebar bg-white" id="sidebarMenu">
+        <div class="sidebar-header">
+            <h5 class="sidebar-title"><i class="bi bi-speedometer2 me-2"></i>Admin Menu</h5>
+        </div>
+        <ul class="navbar-nav">
+            <li class="nav-item fade-in">
+                <a class="nav-link {% if request.path == '/admin/dashboard/' %}active{% endif %}" href="{% url 'admin_dashboard' %}">
+                    <i class="bi bi-house-door-fill"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item fade-in" style="animation-delay: 0.1s;">
+                <a class="nav-link {% if request.path == '/admin/categories/' %}active{% endif %}" href="{% url 'add_category' %}">
+                    <i class="bi bi-tags-fill"></i> Categories
+                </a>
+            </li>
+            <li class="nav-item fade-in" style="animation-delay: 0.2s;">
+                <a class="nav-link {% if request.path == '/admin/products/' %}active{% endif %}" href="{% url 'add_product' %}">
+                    <i class="bi bi-box-seam"></i> Products
+                </a>
+            </li>
+            <li class="nav-item fade-in" style="animation-delay: 0.3s;">
+                <a class="nav-link {% if request.path == '/admin/orders/' %}active{% endif %}" href="{% url 'admin_orders' %}">
+                    <i class="bi bi-bag-check"></i> Orders
+                </a>
+            </li>
+            
+            <li class="nav-item fade-in" style="animation-delay: 0.4s;">
+                <a class="nav-link {% if request.path == '/admin/users/' %}active{% endif %}" href="{% url 'admin_users' %}">
+                    <i class="bi bi-people-fill"></i> Users
+                </a>
+            </li>
+            <li class="nav-item fade-in" style="animation-delay: 0.6s;">
+    <a class="nav-link {% if request.path == '/admin/dealers/' %}active{% endif %}" href="{% url 'pending_dealers' %}">
+        <i class="bi bi-check-circle-fill"></i> Dealer approval
+    </a>
+</li>
+<li class="nav-item fade-in" style="animation-delay: 0.5s;">
+    <a class="nav-link {% if request.path == '/manage-coupons/' %}active{% endif %}" href="{% url 'manage_coupons' %}">
+        <i class="bi bi-ticket-perforated"></i> Add Coupons
+    </a>
+</li>
+<li class="nav-item fade-in" style="animation-delay: 0.5s;">
+  <a class="nav-link {% if request.path == '/admin/chat/' %}active{% endif %}" href="{% url 'admin_chat' %}">
+    <i class="bi bi-chat-dots"></i> Admin Chat
+  </a>
+</li>
+
+<li class="nav-item fade-in" style="animation-delay: 0.6s;">
+  <a class="nav-link {% if request.path == '/admin/add-hub/' %}active text-white bg-primary{% endif %}" 
+     href="{% url 'hub_branch_management' %}">
+    <i class="bi bi-diagram-3 me-1"></i> HUB & Branch
+  </a>
+</li>
+
+<li class="nav-item fade-in" style="animation-delay: 0.7s;">
+  <a class="nav-link {% if request.resolver_match.url_name == 'view_assigned_orders_admin' %}active{% endif %}" href="{% url 'view_assigned_orders_admin' %}">
+    <i class="bi bi-bag-check me-1"></i> Orders
+  </a>
+</li>
+
+
+
+
+
+
+
+            
+        </ul>
+
+        <!-- Help & Support Section -->
+        <div class="mt-4 pt-4 border-top border-light px-3">
+            <h6 class="text-uppercase text-muted fw-semibold fs-7 ms-3 mb-3">Support</h6>
+            <ul class="navbar-nav">
+                <li class="nav-item fade-in" style="animation-delay: 0.7s;">
+                    <a class="nav-link" href="{% url 'admin_help' %}">
+                        <i class="bi bi-question-circle"></i> Help Center
+                    </a>
+                </li>
+                <li class="nav-item fade-in" style="animation-delay: 0.8s;">
+                    <a class="nav-link" href="{% url 'logout' %}">
+                        <i class="bi bi-box-arrow-right"></i> Logout
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content" id="mainContent">
+        {% block content %}
+        <!-- Specific page content goes here -->
+        {% endblock %}
+
+        <!-- Footer -->
+        <footer class="footer mt-5">
+            <div class="container-fluid">
+                <div class="d-sm-flex justify-content-between">
+                    <span>© 2025 Company Name. All rights reserved.</span>
+                    <div class="mt-2 mt-sm-0">
+                        <a href="#" class="text-decoration-none text-muted me-3">Privacy Policy</a>
+                        <a href="#" class="text-decoration-none text-muted me-3">Terms of Service</a>
+                        <a href="#" class="text-decoration-none text-muted">Contact Us</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Toggle Sidebar Functionality
+            const toggleBtn = document.getElementById('toggleSidebar');
+            const sidebar = document.getElementById('sidebarMenu');
+            const content = document.getElementById('mainContent');
+
+            toggleBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+                content.classList.toggle('content-expanded');
+            });
+
+            // Responsive sidebar behavior
+            function handleResize() {
+                if (window.innerWidth < 992) {
+                    sidebar.classList.remove('active');
+                    content.classList.add('content-expanded');
+                } else {
+                    sidebar.classList.add('active');
+                    content.classList.remove('content-expanded');
+                }
+            }
+
+            // Initialize on page load
+            handleResize();
+            
+            // Handle window resize
+            window.addEventListener('resize', handleResize);
+            
+            // Add active class to current page's sidebar link
+            const currentLocation = window.location.pathname;
+            const navLinks = document.querySelectorAll('.sidebar .nav-link');
+            
+            navLinks.forEach(link => {
+                const href = link.getAttribute('href');
+                if (href === currentLocation) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+
+    <!-- Additional scripts for specific pages -->
+    {% block scripts %}{% endblock %}
+</body>

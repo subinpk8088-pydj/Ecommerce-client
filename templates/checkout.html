@@ -1,0 +1,839 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Checkout{% endblock %}
+{% block content %}
+
+<!-- Google Fonts - Nunito -->
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<div class="container py-5">
+  <div class="row">
+    <!-- Checkout Form Column -->
+    <div class="col-lg-8">
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white border-0 pt-4">
+          <h2 class="mb-0">Checkout</h2>
+        </div>
+        <div class="card-body p-4">
+
+          <!-- Checkout Form -->
+          <form method="post" action="{% url 'process_checkout' %}" id="checkoutForm">
+            {% csrf_token %}
+            
+            <h4 class="mb-3">Shipping Information</h4>
+            
+            <!-- Saved Addresses Section -->
+            {% if addresses %}
+              <div class="mb-4">
+                <label class="form-label">Select a Saved Address</label>
+                <div class="row">
+                  {% for address in addresses %}
+                    <div class="col-md-6 mb-3">
+                      <div class="card address-card h-100 position-relative {% if address.is_default %}border-primary{% else %}border-light{% endif %}" onclick="selectAddress('{{ address.id }}')">
+                        <div class="card-body">
+                          <div class="position-absolute top-0 start-0 m-2">
+                            <input type="radio" name="address_id" id="address_{{ address.id }}" value="{{ address.id }}" class="form-check-input" {% if address.is_default %}checked{% endif %}>
+                          </div>
+                          <div class="ps-4">
+                            <h5 class="card-title mb-1">{{ address.name }}</h5>
+                            <p class="card-text mb-1 text-muted">
+                              <small>{{ address.phone_number }}</small>
+                            </p>
+                            <p class="card-text">
+                              {{ address.address_line }}<br>
+                              {{ address.city }}, {{ address.state }} - {{ address.pincode }}
+                            </p>
+                            {% if address.is_default %}
+                              <span class="badge bg-primary">Default</span>
+                            {% endif %}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+                
+                <div class="d-flex align-items-center mt-3">
+                  <div class="border-top flex-grow-1"></div>
+                  <div class="px-3 text-muted">OR</div>
+                  <div class="border-top flex-grow-1"></div>
+                </div>
+              </div>
+            {% endif %}
+            
+            <!-- Add New Address Button -->
+            <div class="text-center mb-4">
+              <a href="{% url 'manage_addresses' %}?next={% url 'checkout' %}" class="btn btn-outline-primary">
+                <i class="fas fa-plus-circle me-2"></i> Add New Address
+              </a>
+            </div>
+            
+            <!-- Manual Address Entry (only shown if no address is selected) -->
+            <div id="manualAddressSection" class="{% if addresses %}d-none{% endif %}">
+              <div class="mb-3">
+                <label for="name" class="form-label">Full Name</label>
+                <input type="text" class="form-control" id="name" name="name" value="{{ request.user.get_full_name }}">
+              </div>
+              
+              <div class="mb-3">
+                <label for="phone" class="form-label">Phone Number</label>
+                <input type="tel" class="form-control" id="phone" name="phone" value="{{ request.user.phone_number }}">
+              </div>
+              
+              <div class="mb-3">
+                <label for="address" class="form-label">Delivery Address</label>
+                <textarea class="form-control" id="address" name="address" rows="3"></textarea>
+              </div>
+              
+              <div class="mb-3">
+                <label for="city" class="form-label">City</label>
+                <input type="text" class="form-control" id="city" name="city">
+              </div>
+              
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="state" class="form-label">State</label>
+                  <input type="text" class="form-control" id="state" name="state">
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="pincode" class="form-label">PIN Code</label>
+                  <input type="text" class="form-control" id="pincode" name="pincode">
+                </div>
+              </div>
+              
+              <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="saveAddress" name="save_address">
+                <label class="form-check-label" for="saveAddress">Save this address for future orders</label>
+              </div>
+            </div>
+            
+            <!-- Coupon Section -->
+            <h4 class="mb-3">Apply Coupon</h4>
+            <div class="mb-4">
+              <!-- Coupon Code Input -->
+              <div class="mb-3">
+                <label for="couponCode" class="form-label">Enter Coupon Code</label>
+                <div class="input-group">
+                  <input type="text" class="form-control" id="couponCode" placeholder="Enter coupon code" style="text-transform: uppercase;">
+                  <button type="button" class="btn btn-outline-primary" id="applyCouponBtn">Apply</button>
+                </div>
+                <div id="couponMessage" class="mt-2"></div>
+              </div>
+
+              <!-- Available Coupons Display -->
+              <div class="mb-3">
+                <h5 class="mb-3">Available Coupons</h5>
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <div class="card coupon-option border-light" onclick="selectCoupon('none')">
+                      <div class="card-body d-flex align-items-center">
+                        <input type="radio" name="coupon_id" id="no_coupon" value="" class="form-check-input me-3" checked>
+                        <div>
+                          <h6 class="mb-1">No Coupon</h6>
+                          <small class="text-muted">Proceed without discount</small>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Show all available coupons -->
+                  {% for coupon in all_coupons %}
+                    <div class="col-md-6 mb-3">
+                      <div class="card coupon-option border-light" onclick="selectCouponByCode('{{ coupon.code }}')">
+                        <div class="card-body">
+                          <h6 class="mb-1">{{ coupon.name }}</h6>
+                          <small class="text-muted">Code: <strong>{{ coupon.code }}</strong></small><br>
+                          <small class="text-success"><strong>10% OFF</strong></small>
+                          <div class="mt-2">
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="applyCouponCode('{{ coupon.code }}')">Apply This Coupon</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+
+              <!-- Dynamic Coupon Selection Area -->
+              <div id="dynamicCouponSection" style="display: none;">
+                <div class="card border-success">
+                  <div class="card-body">
+                    <h6 class="text-success mb-2">Applied Coupon</h6>
+                    <div id="appliedCouponDetails"></div>
+                    <button type="button" class="btn btn-sm btn-outline-danger mt-2" onclick="removeCoupon()">Remove Coupon</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <h4 class="mb-3">Payment Method</h4>
+            
+            <div class="payment-options">
+              <div class="payment-option" onclick="selectPayment('cod')">
+                <input type="radio" id="cod" name="payment_mode" value="cod" required>
+                <label for="cod" class="mb-0 ms-2">
+                  <i class="fas fa-money-bill-wave"></i>
+                  <div>
+                    <strong>Cash on Delivery</strong>
+                    <p class="mb-0 text-muted">Pay when your order arrives</p>
+                  </div>
+                </label>
+              </div>
+              
+              <div class="payment-option" onclick="selectPayment('card')">
+                <input type="radio" id="card" name="payment_mode" value="card">
+                <label for="card" class="mb-0 ms-2">
+                  <i class="fas fa-credit-card"></i>
+                  <div>
+                    <strong>Credit/Debit Card</strong>
+                    <p class="mb-0 text-muted">Secure online payment</p>
+                  </div>
+                </label>
+              </div>
+              
+              <div class="payment-option" onclick="selectPayment('upi')">
+                <input type="radio" id="upi" name="payment_mode" value="upi">
+                <label for="upi" class="mb-0 ms-2">
+                  <i class="fas fa-mobile-alt"></i>
+                  <div>
+                    <strong>UPI</strong>
+                    <p class="mb-0 text-muted">Pay using UPI apps</p>
+                  </div>
+                </label>
+              </div>
+            </div>
+            
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+              <a href="{% url 'view_cart' %}" class="btn btn-secondary me-md-2">
+                <i class="fas fa-arrow-left me-2"></i> Back to Cart
+              </a>
+              <button type="submit" class="btn btn-primary checkout-btn">
+                <i class="fas fa-check-circle me-2"></i> Place Order
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Order Summary Column -->
+    <div class="col-lg-4">
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white border-0 pt-4">
+      <h4 class="mb-0">Order Summary</h4>
+    </div>
+    <div class="card-body p-4">
+      <div class="items-summary">
+        {% for item in items %}
+          <div class="d-flex justify-content-between mb-2">
+            <div>
+              <span class="fw-bold">{{ item.quantity }}x</span> {{ item.product.name }}<br>
+              <small class="text-muted">GST: ₹{{ item.gst|floatformat:2 }}</small>
+            </div>
+            <div>₹{{ item.total_with_gst|floatformat:2 }}</div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <hr>
+
+      <div class="d-flex justify-content-between">
+        <span>Subtotal</span>
+        <span>₹{{ subtotal|floatformat:2 }}</span>
+      </div>
+      <div class="d-flex justify-content-between">
+        <span>Total GST</span>
+        <span>₹{{ total_gst|floatformat:2 }}</span>
+      </div>
+      <div class="d-flex justify-content-between">
+        <span>Shipping</span>
+        <span>Free</span>
+      </div>
+      
+      <!-- Coupon Discount Display -->
+      <div class="d-flex justify-content-between text-success" id="couponDiscountRow" style="display: none !important;">
+        <span>Coupon Discount (10%)</span>
+        <span id="couponDiscountAmount">-₹0.00</span>
+      </div>
+
+      <hr>
+
+      <div class="d-flex justify-content-between fw-bold">
+        <span>Grand Total</span>
+        <span class="text-primary" id="grandTotalDisplay">₹{{ grand_total|floatformat:2 }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+  </div>
+</div>
+
+<script>
+  // Store original values for calculations
+  const originalGrandTotal = {{ grand_total }};
+  let currentAppliedCoupon = null;
+  
+  // Get CSRF token for AJAX requests
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  function applyCouponCode(couponCode) {
+    document.getElementById('couponCode').value = couponCode;
+    validateAndApplyCoupon();
+  }
+
+  function validateAndApplyCoupon() {
+    const couponCode = document.getElementById('couponCode').value.trim().toUpperCase();
+    const messageDiv = document.getElementById('couponMessage');
+    const applyBtn = document.getElementById('applyCouponBtn');
+    
+    if (!couponCode) {
+      messageDiv.innerHTML = '<div class="alert alert-warning">Please enter a coupon code</div>';
+      return;
+    }
+    
+    // Show loading state
+    applyBtn.disabled = true;
+    applyBtn.innerHTML = 'Applying...';
+    messageDiv.innerHTML = '<div class="alert alert-info">Validating coupon...</div>';
+    
+    // Make AJAX request to validate coupon
+    fetch('{% url "validate_coupon" %}', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken')
+      },
+      body: JSON.stringify({
+        coupon_code: couponCode
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      applyBtn.disabled = false;
+      applyBtn.innerHTML = 'Apply';
+      
+      if (data.valid) {
+        // Success - show applied coupon
+        messageDiv.innerHTML = `<div class="alert alert-success">${data.message}</div>`;
+        showAppliedCoupon(data.coupon);
+      } else {
+        // Error - show message
+        messageDiv.innerHTML = `<div class="alert alert-danger">${data.message}</div>`;
+      }
+    })
+    .catch(error => {
+      applyBtn.disabled = false;
+      applyBtn.innerHTML = 'Apply';
+      messageDiv.innerHTML = '<div class="alert alert-danger">An error occurred. Please try again.</div>';
+    });
+  }
+
+  function showAppliedCoupon(coupon) {
+    currentAppliedCoupon = coupon;
+    
+    // Create hidden input for form submission
+    const existingInput = document.getElementById('selectedCouponId');
+    if (existingInput) {
+      existingInput.remove();
+    }
+    
+    const hiddenInput = document.createElement('input');
+    hiddenInput.type = 'hidden';
+    hiddenInput.name = 'coupon_id';
+    hiddenInput.id = 'selectedCouponId';
+    hiddenInput.value = coupon.id;
+    document.getElementById('checkoutForm').appendChild(hiddenInput);
+    
+    // Show applied coupon section
+    document.getElementById('appliedCouponDetails').innerHTML = `
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <strong>${coupon.name}</strong><br>
+          <small class="text-muted">Code: ${coupon.code}</small><br>
+          <small class="text-success"><strong>10% OFF</strong></small>
+        </div>
+        <div class="text-success">
+          <i class="fas fa-check-circle"></i> Applied
+        </div>
+      </div>
+    `;
+    
+    document.getElementById('dynamicCouponSection').style.display = 'block';
+    
+    // Update order summary
+    updateOrderSummary(true);
+    
+    // Clear the input field
+    document.getElementById('couponCode').value = '';
+    
+    // Hide all coupon options
+    const couponOptions = document.querySelectorAll('.coupon-option');
+    couponOptions.forEach(option => {
+      option.style.display = 'none';
+    });
+  }
+
+  function removeCoupon() {
+    currentAppliedCoupon = null;
+    
+    // Remove hidden input
+    const existingInput = document.getElementById('selectedCouponId');
+    if (existingInput) {
+      existingInput.remove();
+    }
+    
+    // Hide applied coupon section
+    document.getElementById('dynamicCouponSection').style.display = 'none';
+    
+    // Clear messages
+    document.getElementById('couponMessage').innerHTML = '';
+    
+    // Show all coupon options again
+    const couponOptions = document.querySelectorAll('.coupon-option');
+    couponOptions.forEach(option => {
+      option.style.display = 'block';
+    });
+    
+    // Reset no coupon selection
+    document.getElementById('no_coupon').checked = true;
+    selectCoupon('none');
+    
+    // Update order summary
+    updateOrderSummary(false);
+  }
+  
+  function selectAddress(addressId) {
+    // Select the radio button
+    document.getElementById('address_' + addressId).checked = true;
+    
+    // Hide manual address section when a saved address is selected
+    document.getElementById('manualAddressSection').classList.add('d-none');
+    
+    // Highlight the selected address card
+    const addressCards = document.querySelectorAll('.address-card');
+    addressCards.forEach(card => {
+      card.classList.remove('border-primary');
+      card.classList.add('border-light');
+    });
+    
+    const selectedCard = document.getElementById('address_' + addressId).closest('.address-card');
+    selectedCard.classList.remove('border-light');
+    selectedCard.classList.add('border-primary');
+    selectedCard.style.backgroundColor = 'var(--light-purple)';
+  }
+  
+  function selectCoupon(couponId) {
+    // Only allow selection if no dynamic coupon is applied
+    if (currentAppliedCoupon) {
+      return;
+    }
+    
+    // Select the appropriate radio button
+    if (couponId === 'none') {
+      document.getElementById('no_coupon').checked = true;
+    }
+    
+    // Highlight the selected coupon option
+    const couponOptions = document.querySelectorAll('.coupon-option');
+    couponOptions.forEach(option => {
+      option.classList.remove('border-primary');
+      option.classList.add('border-light');
+    });
+    
+    let selectedOption;
+    if (couponId === 'none') {
+      selectedOption = document.getElementById('no_coupon').closest('.coupon-option');
+    }
+    
+    if (selectedOption) {
+      selectedOption.classList.remove('border-light');
+      selectedOption.classList.add('border-primary');
+    }
+    
+    // Update order summary
+    updateOrderSummary(false);
+  }
+
+  function selectCouponByCode(couponCode) {
+    // Apply the coupon code directly
+    document.getElementById('couponCode').value = couponCode;
+    validateAndApplyCoupon();
+  }
+  
+  function updateOrderSummary(hasCoupon) {
+    const couponDiscountRow = document.getElementById('couponDiscountRow');
+    const couponDiscountAmount = document.getElementById('couponDiscountAmount');
+    const grandTotalDisplay = document.getElementById('grandTotalDisplay');
+    
+    if (hasCoupon) {
+      const discountAmount = originalGrandTotal * 0.10; // 10% discount
+      const newGrandTotal = originalGrandTotal - discountAmount;
+      
+      couponDiscountRow.style.display = 'flex';
+      couponDiscountAmount.textContent = '-₹' + discountAmount.toFixed(2);
+      grandTotalDisplay.textContent = '₹' + newGrandTotal.toFixed(2);
+    } else {
+      couponDiscountRow.style.display = 'none';
+      grandTotalDisplay.textContent = '₹' + originalGrandTotal.toFixed(2);
+    }
+  }
+  
+  function selectPayment(paymentId) {
+    document.getElementById(paymentId).checked = true;
+    
+    // Highlight the selected payment option
+    const paymentOptions = document.querySelectorAll('.payment-option');
+    paymentOptions.forEach(option => {
+      option.classList.remove('selected');
+    });
+    
+    const selectedOption = document.getElementById(paymentId).closest('.payment-option');
+    selectedOption.classList.add('selected');
+  }
+  
+  // Initialize form with animations
+  document.addEventListener('DOMContentLoaded', function() {
+    // Add event listener for apply coupon button
+    document.getElementById('applyCouponBtn').addEventListener('click', validateAndApplyCoupon);
+    
+    // Add event listener for Enter key in coupon input
+    document.getElementById('couponCode').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        validateAndApplyCoupon();
+      }
+    });
+    
+    // Animate form elements on load
+    const formElements = document.querySelectorAll('.form-control, .form-select, .btn, .payment-option, .address-card, .coupon-option');
+    formElements.forEach((element, index) => {
+      element.style.opacity = '0';
+      element.style.animation = `slideIn 0.3s ease forwards ${0.1 + index * 0.05}s`;
+    });
+    
+    // If any saved address is selected, hide manual address section
+    const selectedAddressRadio = document.querySelector('input[name="address_id"]:checked');
+    if (selectedAddressRadio) {
+      document.getElementById('manualAddressSection').classList.add('d-none');
+      const selectedCard = selectedAddressRadio.closest('.address-card');
+      if (selectedCard) {
+        selectedCard.style.backgroundColor = 'var(--light-purple)';
+      }
+    }
+    
+    // Handle toggling between saved and manual address
+    const addressRadios = document.querySelectorAll('input[name="address_id"]');
+    addressRadios.forEach(radio => {
+      radio.addEventListener('change', function() {
+        document.getElementById('manualAddressSection').classList.add('d-none');
+      });
+    });
+    
+    // Initialize payment option styles
+    const codRadio = document.getElementById('cod');
+    if (codRadio && codRadio.checked) {
+      codRadio.closest('.payment-option').classList.add('selected');
+    }
+    
+    // Initialize coupon selection
+    const noCouponRadio = document.getElementById('no_coupon');
+    if (noCouponRadio && noCouponRadio.checked) {
+      noCouponRadio.closest('.coupon-option').classList.add('border-primary');
+    }
+  });
+</script>
+<!-- Custom CSS -->
+/* Replace the existing <style> section in your checkout template with this scoped version */
+
+<style>
+  :root {
+    --primary: #7c5295;
+    --primary-light: #9a73b0;
+    --primary-dark: #5e3d72;
+    --accent: #f3e8ff;
+    --light-purple: #f9f4ff;
+    --text-dark: #3a3a3a;
+    --text-light: #6c757d;
+    --white: #ffffff;
+    --gray-light: #f8f9fa;
+    --shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08);
+    --transition: all 0.3s ease;
+  }
+
+  /* Scope styles to checkout page only */
+  .checkout-page {
+    font-family: 'Nunito', sans-serif;
+    color: var(--text-dark);
+    background-color: var(--gray-light);
+  }
+
+  .checkout-page .container {
+    max-width: 1200px;
+    animation: fadeIn 0.8s ease;
+  }
+
+  .checkout-page h2, 
+  .checkout-page h4 {
+    color: var(--primary-dark);
+    font-weight: 700;
+  }
+
+  .checkout-page .card {
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    animation: slideUp 0.5s ease;
+  }
+
+  .checkout-page .card:hover {
+    box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.12);
+  }
+
+  .checkout-page .card-header {
+    padding: 1.5rem 1.5rem 1rem;
+  }
+
+  .checkout-page .card-body {
+    padding: 1.5rem;
+  }
+
+  /* Scope button styles to checkout page only */
+  .checkout-page .btn {
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 0.6rem 1.2rem;
+    transition: var(--transition);
+  }
+
+  .checkout-page .btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+  }
+
+  .checkout-page .btn-primary:hover, 
+  .checkout-page .btn-primary:focus {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+    transform: translateY(-2px);
+  }
+
+  .checkout-page .btn-secondary {
+    color: var(--primary-dark);
+    background-color: var(--white);
+    border: 1px solid var(--primary-light);
+  }
+
+  .checkout-page .btn-secondary:hover, 
+  .checkout-page .btn-secondary:focus {
+    background-color: var(--light-purple);
+    color: var(--primary-dark);
+    transform: translateY(-2px);
+  }
+
+  .checkout-page .btn-outline-primary {
+    color: var(--primary);
+    border-color: var(--primary);
+  }
+
+  .checkout-page .btn-outline-primary:hover, 
+  .checkout-page .btn-outline-primary:focus {
+    background-color: var(--primary);
+    color: white;
+    transform: translateY(-2px);
+  }
+
+  .checkout-page .form-control, 
+  .checkout-page .form-select {
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    border: 1px solid #e0e0e0;
+    transition: var(--transition);
+  }
+
+  .checkout-page .form-control:focus, 
+  .checkout-page .form-select:focus {
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 0.2rem rgba(124, 82, 149, 0.15);
+  }
+
+  .checkout-page .form-label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--primary-dark);
+  }
+
+  .checkout-page .form-check-input:checked {
+    background-color: var(--primary);
+    border-color: var(--primary);
+  }
+
+  /* Address Cards */
+  .checkout-page .address-card {
+    cursor: pointer;
+    transition: var(--transition);
+    border-radius: 12px;
+    border-width: 2px;
+  }
+
+  .checkout-page .address-card:hover {
+    border-color: var(--primary) !important;
+    transform: translateY(-4px);
+  }
+
+  .checkout-page .address-card.border-primary {
+    background-color: var(--light-purple);
+  }
+
+  /* Payment Options */
+  .checkout-page .payment-options {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .checkout-page .payment-option {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+
+  .checkout-page .payment-option:hover {
+    border-color: var(--primary);
+    background-color: var(--light-purple);
+    transform: translateY(-2px);
+  }
+
+  .checkout-page .payment-option input {
+    accent-color: var(--primary);
+  }
+
+  .checkout-page .payment-option label {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    cursor: pointer;
+    font-weight: 600;
+  }
+
+  .checkout-page .payment-option i {
+    font-size: 1.5rem;
+    margin-right: 1rem;
+    color: var(--primary);
+  }
+
+  .checkout-page .payment-option.selected {
+    border-color: var(--primary);
+    background-color: var(--light-purple);
+  }
+
+  /* Order Summary */
+  .checkout-page .items-summary {
+    max-height: 250px;
+    overflow-y: auto;
+    margin-bottom: 1rem;
+    padding-right: 0.5rem;
+  }
+
+  .checkout-page .badge {
+    background-color: var(--primary);
+  }
+
+  /* Dividers */
+  .checkout-page hr {
+    opacity: 0.15;
+    margin: 1rem 0;
+  }
+
+  /* Animations */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  @keyframes slideIn {
+    from { transform: translateX(-20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  /* Make checkout button more prominent */
+  .checkout-page .checkout-btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 1.05rem;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(124, 82, 149, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(124, 82, 149, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(124, 82, 149, 0); }
+  }
+
+  /* Custom scrollbar for items summary */
+  .checkout-page .items-summary::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .checkout-page .items-summary::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+
+  .checkout-page .items-summary::-webkit-scrollbar-thumb {
+    background: var(--primary-light);
+    border-radius: 10px;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .checkout-page .card-body {
+      padding: 1.25rem;
+    }
+  }
+
+  /* Coupon option styles */
+  .checkout-page .coupon-option {
+    cursor: pointer;
+    transition: var(--transition);
+    border-radius: 12px;
+    border-width: 2px;
+  }
+
+  .checkout-page .coupon-option:hover {
+    border-color: var(--primary) !important;
+    transform: translateY(-2px);
+  }
+
+  .checkout-page .coupon-option.border-primary {
+    background-color: var(--light-purple);
+  }
+</style>
+{% endblock %}

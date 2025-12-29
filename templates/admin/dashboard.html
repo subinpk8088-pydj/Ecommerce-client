@@ -1,0 +1,273 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<br><br><br>
+<div class="container-fluid">
+    <h2 class="mb-4 fade-in">Welcome to the Admin Dashboard</h2>
+    <p class="fade-in" style="animation-delay: 0.2s;">
+        E-commerce for a Firm which is handling Sanitary Pads, Maternity Pads, Baby
+        Diapers and wholesale traders of Baby Wipes, Adult Wipes, Baby Products,
+        Tissues etc is to be done.
+    </p>
+
+    <div class="row text-center mb-4">
+        <div class="col-md-3">
+            <div class="card soft-card">
+                <div class="card-body">
+                    <h6 class="card-title text-muted">Total Orders</h6>
+                    <h3 class="card-value">1,245</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card soft-card">
+                <div class="card-body">
+                    <h6 class="card-title text-muted">Total Users</h6>
+                    <h3 class="card-value">820</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card soft-card">
+                <div class="card-body">
+                    <h6 class="card-title text-muted">Revenue (This Month)</h6>
+                    <h3 class="card-value">₹95,000</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card soft-card">
+                <div class="card-body">
+                    <h6 class="card-title text-muted">Products</h6>
+                    <h3 class="card-value">58</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card soft-card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Sales by Product Category</h5>
+                    <div class="chart-container">
+                        <canvas id="categorySalesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card soft-card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Monthly Revenue</h5>
+                    <div class="chart-container">
+                        <canvas id="monthlyRevenueChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card soft-card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Customer Type Distribution</h5>
+                    <div class="chart-container">
+                        <canvas id="customerTypeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card soft-card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Top Selling Products</h5>
+                    <div class="chart-container">
+                        <canvas id="topProductsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Orders Table -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card soft-card">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Recent Orders</h5>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover align-middle">
+                            <thead class="table-header">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Customer</th>
+                                    <th>Product</th>
+                                    <th>Quantity</th>
+                                    <th>Total (₹)</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>1001</td>
+                                    <td>Anjali R</td>
+                                    <td>Baby Diapers</td>
+                                    <td>3</td>
+                                    <td>1,200</td>
+                                    <td><span class="badge bg-success">Delivered</span></td>
+                                </tr>
+                                <tr>
+                                    <td>1002</td>
+                                    <td>Rahul Menon</td>
+                                    <td>Sanitary Pads</td>
+                                    <td>5</td>
+                                    <td>750</td>
+                                    <td><span class="badge bg-warning text-dark">Pending</span></td>
+                                </tr>
+                                <tr>
+                                    <td>1003</td>
+                                    <td>Neha P</td>
+                                    <td>Wipes</td>
+                                    <td>10</td>
+                                    <td>2,000</td>
+                                    <td><span class="badge bg-info text-dark">Shipped</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart JS -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Custom Styles -->
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap');
+
+body {
+    font-family: 'Nunito', sans-serif;
+    background-color: #f8f6fb;
+    color: #444;
+}
+
+.fade-in {
+    opacity: 0;
+    animation: fadeInUp 0.6s ease forwards;
+}
+
+@keyframes fadeInUp {
+    0% { opacity: 0; transform: translateY(15px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+.soft-card {
+    background-color: #fff;
+    border-left: 5px solid #7c5295;
+    border-radius: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 20px rgba(124, 82, 149, 0.08);
+}
+
+.soft-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(124, 82, 149, 0.12);
+}
+
+.card-title {
+    color: #7c5295;
+    font-weight: 700;
+}
+
+.card-value {
+    font-size: 1.8rem;
+    color: #ff6f91;
+    font-weight: 700;
+}
+
+.table-header {
+    background-color: #e6d6f3;
+    color: #7c5295;
+    font-weight: 600;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f2e9fb;
+}
+
+.chart-container {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 5 / 2;
+}
+
+canvas {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain;
+}
+</style>
+
+<!-- Chart Initialization -->
+<script>
+const categorySalesChart = new Chart(document.getElementById('categorySalesChart'), {
+    type: 'doughnut',
+    data: {
+        labels: ['Sanitary Pads', 'Maternity Pads', 'Baby Diapers', 'Wipes', 'Tissues'],
+        datasets: [{
+            data: [25, 15, 30, 20, 10],
+            backgroundColor: ['#f9a8d4', '#fcd34d', '#a5b4fc', '#c084fc', '#facc15']
+        }]
+    }
+});
+
+const monthlyRevenueChart = new Chart(document.getElementById('monthlyRevenueChart'), {
+    type: 'line',
+    data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+        datasets: [{
+            label: 'Revenue (₹)',
+            data: [50000, 60000, 75000, 70000, 85000, 95000],
+            backgroundColor: 'rgba(255, 111, 145, 0.2)',
+            borderColor: '#ff6f91',
+            fill: true,
+            tension: 0.4
+        }]
+    }
+});
+
+const customerTypeChart = new Chart(document.getElementById('customerTypeChart'), {
+    type: 'bar',
+    data: {
+        labels: ['Retail Customers', 'Wholesale Traders'],
+        datasets: [{
+            label: 'Customers',
+            data: [300, 100],
+            backgroundColor: ['#a78bfa', '#f472b6']
+        }]
+    }
+});
+
+const topProductsChart = new Chart(document.getElementById('topProductsChart'), {
+    type: 'bar',
+    data: {
+        labels: ['Baby Diapers', 'Sanitary Pads', 'Wipes', 'Maternity Pads'],
+        datasets: [{
+            label: 'Units Sold',
+            data: [1200, 950, 850, 600],
+            backgroundColor: '#7c5295'
+        }]
+    },
+    options: {
+        indexAxis: 'y'
+    }
+});
+</script>
+{% endblock %}

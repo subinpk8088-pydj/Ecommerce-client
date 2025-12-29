@@ -1,0 +1,15 @@
+{% extends 'admin/base.html' %}
+{% block content %}
+<h3>Categories</h3>
+<a href="{% url 'add_category' %}" class="btn btn-primary">Add Category</a>
+<ul>
+    {% for category in categories %}
+        <li>
+            <strong>{{ category.name }}</strong><br>
+            <em>{{ category.description|default:"No description available" }}</em><br>
+            <a href="{% url 'edit_category' category.id %}">Edit</a> | 
+            <a href="{% url 'delete_category' category.id %}">Delete</a>
+        </li>
+    {% endfor %}
+</ul>
+{% endblock %}

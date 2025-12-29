@@ -1,0 +1,303 @@
+{% extends 'branch/branch_base.html' %}
+{% load static %}
+{% block content %}
+<!-- Google Font -->
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+    body {
+        font-family: 'Nunito', sans-serif;
+        background-color: #f9f7fc;
+        color: #333;
+    }
+
+    h2, h5, .card-title {
+        color: #7c5295;
+        font-weight: 700;
+    }
+
+    .card {
+        border: none;
+        border-radius: 1rem;
+        box-shadow: 0 4px 12px rgba(124, 82, 149, 0.15);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 6px 18px rgba(124, 82, 149, 0.2);
+    }
+
+    .table th {
+        background-color: #7c5295;
+        color: #fff;
+        border: none;
+    }
+
+    .table td {
+        vertical-align: middle;
+        background-color: #fff;
+        border: 1px solid #f1e9f5;
+    }
+
+    .badge-info { background-color: #d1c4e9; }
+.badge-primary { background-color: #b39ddb; }
+.badge-warning { background-color: #ffe082; }
+.badge-success { background-color: #a5d6a7; }
+.badge-secondary { background-color: #ccc; }
+
+    .btn-primary {
+        background-color: #7c5295;
+        border-color: #7c5295;
+    }
+
+    .btn-primary:hover {
+        background-color: #684383;
+        transform: translateY(-1px);
+    }
+
+    .btn-info {
+        background-color: #957dad;
+        border-color: #957dad;
+    }
+
+    .btn-info:hover {
+        background-color: #8467a1;
+    }
+
+    .pagination .page-link {
+        color: #7c5295;
+        border-radius: 0.4rem;
+        border: none;
+    }
+
+    .pagination .page-item.active .page-link {
+        background-color: #7c5295;
+        border-color: #7c5295;
+        color: white;
+    }
+
+    .alert-success {
+        background-color: #e6dbf4;
+        color: #5a3d76;
+        border-color: #d1c0e5;
+    }
+
+    .alert-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    .modal-content {
+        border-radius: 1rem;
+        border: none;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-header {
+        background-color: #f3edf9;
+        color: #7c5295;
+        border-bottom: 1px solid #e1d1ee;
+    }
+
+    tr:hover td {
+        background-color: #f8f2fb;
+    }
+
+    .fade-in {
+        animation: fadeIn 0.6s ease-in-out;
+    }
+
+    .slide-up {
+        animation: slideUp 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideUp {
+        from { transform: translateY(15px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+</style>
+
+<div class="container mt-4 fade-in">
+    <h2 class="mb-3">Assigned Parcels - Branch Management</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if purchases %}
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <div class="card slide-up">
+                    <div class="card-body">
+                        <h5 class="card-title">Summary</h5>
+                        <p class="card-text">
+                            Total Assigned Orders: <strong>{{ purchases.paginator.count }}</strong> |
+                            Hub: <strong>{{ branch_hub_name }}</strong>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+<div class="table-responsive mt-3">
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>Tracking #</th>
+                <th>Customer</th>
+                <th>Product</th>
+                <th>Price</th>
+                <th>Order Date</th>
+                <th>Status</th>
+                <th>Assigned Agent</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in purchases %}
+                <tr>
+                    <td>
+                        {% if item.parcel %}
+                            <small class="text-muted">{{ item.parcel.tracking_number }}</small>
+                        {% else %}
+                            <small class="text-muted">No tracking</small>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <strong>{{ item.user.username }}</strong><br>
+                        {% if item.user.phone_number %}
+                            <small class="text-muted">{{ item.user.phone_number }}</small>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {{ item.product.name }}<br>
+                        <small class="text-muted">Qty: {{ item.quantity }}</small>
+                    </td>
+                    <td>₹{{ item.get_total_price_with_gst }}</td>
+                    <td>{{ item.date_bought|date:"M d, Y" }}<br><small>{{ item.date_bought|time:"H:i" }}</small></td>
+                    <td>
+                        <span class="badge text-dark
+                            {% if item.status == 'assigned_to_branch' %}badge-info
+                            {% elif item.status == 'assigned_to_agent' %}badge-primary
+                            {% elif item.status == 'out_for_delivery' %}badge-warning
+                            {% elif item.status == 'delivered' %}badge-success
+                            {% else %}badge-secondary{% endif %}">
+                            {{ item.get_status_display }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if item.assigned_delivery_agent %}
+                            <strong>{{ item.assigned_delivery_agent.name }}</strong><br>
+                            <small class="text-muted">{{ item.assigned_delivery_agent.phone }}</small>
+                        {% else %}
+                            <span class="text-muted">Not assigned</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if item.status == 'assigned_to_branch' %}
+                            <form method="post" style="display:inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="purchase_id" value="{{ item.id }}">
+                                <input type="hidden" name="action" value="assign_to_agent">
+                                <div class="form-group mb-2">
+                                    <select name="agent_id" class="form-control form-control-sm" required>
+                                        <option value="">Select Agent</option>
+                                        {% for agent in delivery_agents %}
+                                            <option value="{{ agent.id }}">{{ agent.name }} - {{ agent.phone }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-sm btn-primary">Assign Agent</button>
+                            </form>
+                        {% elif item.status == 'assigned_to_agent' %}
+                            <form method="post" style="display:inline;">
+                                {% csrf_token %}
+                                <input type="hidden" name="purchase_id" value="{{ item.id }}">
+                                <input type="hidden" name="action" value="mark_out_for_delivery">
+                                <button type="submit" class="btn btn-sm btn-warning" onclick="return confirm('Mark this order as out for delivery?')">Out for Delivery</button>
+                            </form>
+                        {% elif item.status == 'out_for_delivery' %}
+                            <span class="text-success"><i class="fas fa-truck"></i> Out for delivery</span>
+                        {% else %}
+                            <span class="text-muted">No actions</span>
+                        {% endif %}
+
+                        <!-- Modal (optional - still included) -->
+                        <div class="modal fade" id="addressModal{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="addressModalLabel{{ item.id }}" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="addressModalLabel{{ item.id }}">Delivery Address</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p><strong>Name:</strong> {{ item.address_name }}</p>
+                                        <p><strong>Phone:</strong> {{ item.address_phone }}</p>
+                                        <p><strong>Address:</strong><br>{{ item.address }}</p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Pagination -->
+<nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+        {% if purchases.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ purchases.previous_page_number }}" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+        {% endif %}
+
+        {% for num in purchases.paginator.page_range %}
+            {% if purchases.number == num %}
+                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+            {% elif num > purchases.number|add:'-3' and num < purchases.number|add:'3' %}
+                <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+            {% endif %}
+        {% endfor %}
+
+        {% if purchases.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ purchases.next_page_number }}" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+        {% endif %}
+    </ul>
+</nav>
+
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            No assigned parcels found.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

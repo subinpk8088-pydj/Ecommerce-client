@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block content %}
+{% if messages %}
+  <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+    {% for message in messages %}
+      <div class="toast show custom-toast align-items-center text-white shadow fade-in-slide" role="alert">
+        <div class="d-flex">
+          <div class="toast-body">
+            <i class="bi bi-check-circle-fill me-2"></i> {{ message }}
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<style>
+    /* Toast Styling */
+.custom-toast {
+    background-color: #48c78e; /* Modern soft green */
+    border-left: 4px solid #e8dbf2;
+    border-radius: 0.75rem;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.95rem;
+    animation: slideInTopRight 0.7s ease forwards;
+}
+
+/* Slide-in Animation */
+@keyframes slideInTopRight {
+    0% {
+        opacity: 0;
+        transform: translate(30px, -20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(0, 0);
+    }
+}
+
+</style>
+<div class="container">
+    <h2>Buy Product: {{ product.name }}</h2>
+
+    <form method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+            <label>Product Name:</label>
+            <input type="text" value="{{ product.name }}" class="form-control" readonly>
+        </div>
+        <div class="form-group">
+            <label>Price:</label>
+            <input type="text" value="{{ product.price }}" class="form-control" readonly>
+        </div>
+        <div class="form-group">
+            <label for="address">Delivery Address:</label>
+            <textarea name="address" class="form-control" required></textarea>
+        </div>
+        <div class="form-group">
+            <label for="payment_mode">Payment Mode:</label>
+            <select name="payment_mode" class="form-control" required>
+                <option value="">-- Select --</option>
+                <option value="Online">Online</option>
+                <option value="Cash on Delivery">Cash on Delivery</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-success">Confirm Purchase</button>
+        <a href="{% url 'view_products' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

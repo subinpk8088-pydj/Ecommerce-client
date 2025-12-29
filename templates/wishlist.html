@@ -1,0 +1,390 @@
+{% extends 'base.html' %}
+
+{% block title %}Your Wishlist - Store{% endblock %}
+
+{% block content %}
+{% if messages %}
+  <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+    {% for message in messages %}
+      <div class="toast show custom-toast align-items-center text-white shadow fade-in-slide" role="alert">
+        <div class="d-flex">
+          <div class="toast-body">
+            <i class="bi bi-check-circle-fill me-2"></i> {{ message }}
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<style>
+    /* Toast Styling */
+.custom-toast {
+    background-color: #48c78e; /* Modern soft green */
+    border-left: 4px solid #e8dbf2;
+    border-radius: 0.75rem;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.95rem;
+    animation: slideInTopRight 0.7s ease forwards;
+}
+
+/* Slide-in Animation */
+@keyframes slideInTopRight {
+    0% {
+        opacity: 0;
+        transform: translate(30px, -20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(0, 0);
+    }
+}
+
+</style>
+<!-- Bootstrap 5 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- Google Fonts - Nunito -->
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Font Awesome for Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<!-- Custom Styles -->
+<style>
+  :root {
+    --primary: #7c5295;
+    --primary-light: #9a73b0;
+    --primary-dark: #64417a;
+    --accent: #f0d9ff;
+    --text-dark: #3a3a3a;
+    --text-light: #6c757d;
+    --bg-light: #fcf9ff;
+    --shadow-sm: 0 4px 10px rgba(124, 82, 149, 0.1);
+    --shadow-md: 0 8px 20px rgba(124, 82, 149, 0.15);
+    --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+  
+  body {
+    font-family: 'Nunito', sans-serif;
+    background-color: var(--bg-light);
+    color: var(--text-dark);
+  }
+  
+  h2 {
+    color: var(--primary);
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 1.5rem;
+    position: relative;
+    display: inline-block;
+    padding-bottom: 0.5rem;
+  }
+  
+  h2:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60%;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+    border-radius: 10px;
+  }
+  
+  .wishlist-card {
+    transition: var(--transition);
+    animation: fadeIn 0.6s ease-in;
+    border-radius: 1rem;
+    overflow: hidden;
+    border: none;
+    background-color: #ffffff;
+    height: 100%;
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .wishlist-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-md);
+  }
+  
+  .card-img-top {
+    height: 220px;
+    object-fit: cover;
+    transition: var(--transition);
+  }
+  
+  .wishlist-card:hover .card-img-top {
+    transform: scale(1.05);
+  }
+  
+  .card-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--primary-dark);
+    margin-bottom: 0.75rem;
+  }
+  
+  .price-tag {
+    color: var(--primary);
+    font-weight: 700;
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background-color: var(--accent);
+    border-radius: 2rem;
+  }
+  
+  .btn-action {
+    margin-right: 0.5rem;
+    transition: var(--transition);
+    border-radius: 2rem;
+    padding: 0.4rem 0.9rem;
+    font-weight: 600;
+    font-size: 0.85rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .btn-action:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 10px rgba(0,0,0,0.15);
+  }
+  
+  .btn-buy {
+    background-color: var(--primary);
+    border: none;
+    color: white;
+  }
+  
+  .btn-buy:hover {
+    background-color: var(--primary-dark);
+  }
+  
+  .btn-remove {
+    background-color: #ff758f;
+    border: none;
+    color: white;
+  }
+  
+  .btn-remove:hover {
+    background-color: #ff5a7e;
+  }
+  
+  .btn-cart {
+    background-color: #a5d6a7;
+    border: none;
+    color: #2e7d32;
+  }
+  
+  .btn-cart:hover {
+    background-color: #81c784;
+  }
+  
+  .empty-wishlist {
+    text-align: center;
+    padding: 4rem 0;
+    animation: fadeIn 0.8s ease-in;
+  }
+  
+  .empty-wishlist i {
+    font-size: 5rem;
+    color: var(--primary-light);
+    margin-bottom: 1.5rem;
+    animation: pulse 2s infinite;
+  }
+  
+  .empty-wishlist p {
+    color: var(--text-light);
+    font-size: 1.3rem;
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+  }
+  
+  .navigation-links {
+    margin-bottom: 2rem;
+  }
+  
+  .nav-link {
+    color: var(--primary);
+    font-weight: 600;
+    transition: var(--transition);
+    text-decoration: none;
+    position: relative;
+    padding-bottom: 3px;
+  }
+  
+  .nav-link:after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 0;
+    left: 0;
+    background-color: var(--primary);
+    transition: width 0.3s ease;
+  }
+  
+  .nav-link:hover:after {
+    width: 100%;
+  }
+  
+  .nav-link:hover {
+    color: var(--primary-dark);
+  }
+  
+  .nav-link i {
+    margin-right: 0.5rem;
+  }
+  
+  .card-body {
+    padding: 1.5rem;
+  }
+  
+  .card-footer {
+    background-color: #f8f9fa;
+    border-top: 1px solid rgba(124, 82, 149, 0.1);
+    padding: 0.75rem 1.25rem;
+  }
+  
+  .description {
+    color: var(--text-light);
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+  
+  .badge {
+    font-weight: 600;
+    padding: 0.45rem 0.8rem;
+    border-radius: 1rem;
+  }
+  
+  .badge-stock {
+    background-color: var(--accent);
+    color: var(--primary-dark);
+  }
+  
+  .badge-category {
+    background-color: #e1bee7;
+    color: var(--primary-dark);
+  }
+  
+  .browse-btn {
+    background-color: var(--primary);
+    border: none;
+    border-radius: 2rem;
+    padding: 0.6rem 1.5rem;
+    font-weight: 600;
+    transition: var(--transition);
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .browse-btn:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  @keyframes slideIn {
+    from { transform: translateX(-30px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+  
+  .page-title {
+    animation: slideIn 0.5s ease-out;
+  }
+  
+  .container {
+    max-width: 1200px;
+  }
+  
+  .btn-group-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+</style>
+
+<div class="container py-5">
+  <div class="navigation-links">
+    <a href="{% url 'view_products' %}" class="nav-link">
+      <i class="fas fa-arrow-left"></i> Back to Products
+    </a>
+  </div>
+
+  <h2 class="page-title mb-4">Your Wishlist</h2>
+
+  <div class="row g-4">
+    {% for item in wishlist %}
+      <div class="col-lg-4 col-md-6 mb-2">
+        <div class="wishlist-card card h-100">
+          <div class="position-relative overflow-hidden">
+            {% if item.product.image %}
+              <img src="{{ item.product.image.url }}" class="card-img-top" alt="{{ item.product.name }}">
+            {% else %}
+              <img src="https://via.placeholder.com/300x220?text=No+Image" class="card-img-top" alt="No Image">
+            {% endif %}
+          </div>
+          
+          <div class="card-body">
+            <h5 class="card-title">{{ item.product.name }}</h5>
+            <p class="description">{{ item.product.description|truncatechars:80 }}</p>
+            <div class="mb-3">
+              <span class="price-tag">₹{{ item.product.price }}</span>
+            </div>
+            
+            <div class="btn-group-actions">
+              <a href="{% url 'buy_page' item.product.id %}" class="btn btn-buy btn-action">
+                <i class="fas fa-shopping-bag me-1"></i> Buy Now
+              </a>
+              
+              <form method="post" action="{% url 'add_to_cart' item.product.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-cart btn-action">
+                  <i class="fas fa-shopping-cart me-1"></i> Add to Cart
+                </button>
+              </form>
+              
+              <form method="post" action="{% url 'add_to_wishlist' item.product.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-remove btn-action">
+                  <i class="fas fa-heart-broken me-1"></i> Remove
+                </button>
+              </form>
+            </div>
+          </div>
+          
+          <div class="card-footer d-flex justify-content-between align-items-center">
+            <span class="badge badge-stock">Stock: {{ item.product.quantity }}</span>
+            <span class="badge badge-category">{{ item.product.category.name }}</span>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="col-12 empty-wishlist">
+        <i class="far fa-heart"></i>
+        <p>Your wishlist is empty</p>
+        <a href="{% url 'view_products' %}" class="btn browse-btn">
+          <i class="fas fa-shopping-basket me-2"></i>Browse Products
+        </a>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Bootstrap 5 JS Bundle (includes Popper) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-8z+Hc07FHVZ6XaZ5uZc9oxJ7bFnYiKUG1Qw5SNXnoUUMaR7A1R9q6Ht/PrGPej6kz" crossorigin="anonymous"></script>
+{% endblock %}

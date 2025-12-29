@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hub Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        /* Color Palette Variables */
+        :root {
+            --primary: #7c5295;
+            --primary-light: #a17eb6;
+            --secondary: #e882a6;
+            --secondary-light: #ffd3e2;
+            --accent: #5cc6d0;
+            --neutral-light: #f4f6f9;
+            --neutral: #e9ecef;
+            --text-dark: #495057;
+            --text-light: #6c757d;
+            --success: #4caf93;
+            --warning: #ffb347;
+            --danger: #f67280;
+            --white: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Nunito', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, var(--neutral-light) 0%, #e8f2ff 100%);
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
+
+        /* Navbar */
+        .topnav {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1040;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(124, 82, 149, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .nav-brand i {
+            font-size: 1.8rem;
+            color: var(--accent);
+        }
+
+        .nav-user {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            opacity: 0;
+            animation: fadeInRight 0.8s ease-out 0.3s forwards;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .mobile-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-toggle:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.1);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 80px;
+            left: 0;
+            height: calc(100vh - 80px);
+            width: 280px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.08);
+            padding: 2rem 0;
+            z-index: 1030;
+            overflow-y: auto;
+            transform: translateX(0);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar.hidden {
+            transform: translateX(-100%);
+        }
+
+        .sidebar-header {
+            padding: 0 2rem 2rem;
+            border-bottom: 2px solid var(--neutral);
+            margin-bottom: 2rem;
+        }
+
+        .sidebar-header h4 {
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sidebar-header i {
+            color: var(--secondary);
+        }
+
+        .sidebar-nav {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar-nav li {
+            margin-bottom: 8px;
+            opacity: 0;
+            animation: slideInLeft 0.6s ease-out forwards;
+        }
+
+        .sidebar-nav li:nth-child(1) { animation-delay: 0.1s; }
+        .sidebar-nav li:nth-child(2) { animation-delay: 0.2s; }
+        .sidebar-nav li:nth-child(3) { animation-delay: 0.3s; }
+        .sidebar-nav li:nth-child(4) { animation-delay: 0.4s; }
+        .sidebar-nav li:nth-child(5) { animation-delay: 0.5s; }
+
+        .sidebar-nav a {
+            color: var(--text-dark);
+            text-decoration: none;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar-nav a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(124, 82, 149, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .sidebar-nav a:hover::before {
+            left: 100%;
+        }
+
+        .sidebar-nav a:hover {
+            background: linear-gradient(135deg, var(--secondary-light), rgba(92, 198, 208, 0.1));
+            color: var(--primary);
+            transform: translateX(10px);
+            box-shadow: 0 4px 15px rgba(124, 82, 149, 0.2);
+        }
+
+        .sidebar-nav a.active {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            box-shadow: 0 6px 20px rgba(124, 82, 149, 0.4);
+        }
+
+        .sidebar-nav a i {
+            font-size: 1.2rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Content Area */
+        .content {
+            margin-left: 280px;
+            padding: 120px 40px 40px;
+            min-height: 100vh;
+            transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .content.expanded {
+            margin-left: 0;
+        }
+
+        /* Dashboard Cards */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        .stat-card:nth-child(1) { animation-delay: 0.1s; }
+        .stat-card:nth-child(2) { animation-delay: 0.2s; }
+        .stat-card:nth-child(3) { animation-delay: 0.3s; }
+        .stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+        }
+
+        .stat-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: white;
+        }
+
+        .stat-icon.primary { background: linear-gradient(135deg, var(--primary), var(--primary-light)); }
+        .stat-icon.secondary { background: linear-gradient(135deg, var(--secondary), #ff9ec7); }
+        .stat-icon.accent { background: linear-gradient(135deg, var(--accent), #7ed9e3); }
+        .stat-icon.success { background: linear-gradient(135deg, var(--success), #6bc7a4); }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-change {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .stat-change.positive { color: var(--success); }
+        .stat-change.negative { color: var(--danger); }
+
+        /* Chart Section */
+        .chart-section {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-bottom: 40px;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.6s ease-out 0.5s forwards;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .chart-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 20px;
+            border: 2px solid var(--neutral);
+            background: white;
+            color: var(--text-dark);
+            border-radius: 25px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Chart Placeholder */
+        .chart-placeholder {
+            height: 300px;
+            background: linear-gradient(135deg, var(--neutral-light), rgba(124, 82, 149, 0.05));
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+            font-size: 1.1rem;
+            border: 2px dashed var(--neutral);
+        }
+
+        /* Recent Activity */
+        .activity-section {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.6s ease-out 0.6s forwards;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--neutral);
+            transition: all 0.3s ease;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-item:hover {
+            background: var(--neutral-light);
+            border-radius: 12px;
+            padding: 1rem;
+            margin: 0 -1rem;
+        }
+
+        .activity-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+        }
+
+        .activity-time {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .dashboard-grid {
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                gap: 25px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .mobile-toggle {
+                display: block;
+            }
+
+            .nav-user span {
+                display: none;
+            }
+
+            .sidebar {
+                top: 70px;
+                width: 100%;
+                height: calc(100vh - 70px);
+                transform: translateX(-100%);
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .content {
+                margin-left: 0;
+                padding: 100px 20px 20px;
+            }
+
+            .topnav {
+                padding: 1rem;
+            }
+
+            .nav-brand h5 {
+                font-size: 1.1rem;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .chart-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .filter-buttons {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .stat-card {
+                padding: 1.5rem;
+            }
+
+            .stat-number {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .content {
+                padding: 90px 15px 15px;
+            }
+
+            .stat-card,
+            .chart-section,
+            .activity-section {
+                padding: 1.2rem;
+            }
+
+            .sidebar-nav a {
+                padding: 0.8rem 1.5rem;
+            }
+        }
+
+        /* Backdrop overlay for mobile */
+        .backdrop {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1025;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .backdrop.show {
+            display: block;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+<div class="topnav">
+    <div class="nav-brand">
+        <button class="mobile-toggle" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+        </button>
+        <i class="fas fa-cube"></i>
+        <h5>Hub Dashboard</h5>
+    </div>
+    <div class="nav-user">
+        <span>Welcome, {{ request.user.username }}</span>
+        <div class="user-avatar">HB</div>
+    </div>
+</div>
+
+<div class="backdrop" onclick="closeSidebar()"></div>
+
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <h4><i class="fas fa-tachometer-alt"></i> Hub Panel</h4>
+    </div>
+    <ul class="sidebar-nav">
+        <li><a href="{% url 'hub_dashboard' %}" class="active"><i class="fas fa-home"></i> Dashboard</a></li>
+        <li><a href="{% url 'add_delivery_agent' %}"><i class="fas fa-truck"></i> Delivery Agents</a></li>
+        <!-- <li><a href="{% url 'manage_branches' %}"><i class="fas fa-code-branch"></i> Manage Branches</a></li> -->
+        
+<li>
+  <a href="{% url 'hub_purchase_list' %}">
+    <i class="fas fa-shopping-cart"></i> Purchases
+  </a>
+</li>
+<li>
+  <a href="{% url 'view_assigned_orders_hub' %}">
+    <i class="fas fa-box-open"></i> Orders (Hub)
+  </a>
+</li>
+
+
+        <li><a href="#"><i class="fas fa-chart-line"></i> Reports</a></li>
+        <li><a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt text-danger"></i> Logout</a></li>
+    </ul>
+</div>
+
+<div class="content" id="content">
+    
+    <!-- This is where page-specific content will be injected -->
+    {% block content %}
+    {% endblock %}
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const backdrop = document.querySelector('.backdrop');
+        const content = document.getElementById('content');
+        
+        if (window.innerWidth <= 768) {
+            sidebar.classList.toggle('show');
+            backdrop.classList.toggle('show');
+        } else {
+            sidebar.classList.toggle('hidden');
+            content.classList.toggle('expanded');
+        }
+    }
+
+    function closeSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const backdrop = document.querySelector('.backdrop');
+        
+        sidebar.classList.remove('show');
+        backdrop.classList.remove('show');
+    }
+
+    function setActiveFilter(button) {
+        // Remove active class from all buttons
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        // Add active class to clicked button
+        button.classList.add('active');
+        
+        // Here you would typically update the chart data
+        console.log('Filter changed to:', button.textContent);
+    }
+
+    // Handle window resize
+    window.addEventListener('resize', function() {
+        const sidebar = document.getElementById('sidebar');
+        const backdrop = document.querySelector('.backdrop');
+        const content = document.getElementById('content');
+        
+        if (window.innerWidth > 768) {
+            sidebar.classList.remove('show');
+            backdrop.classList.remove('show');
+            
+            if (sidebar.classList.contains('hidden')) {
+                content.classList.add('expanded');
+            } else {
+                content.classList.remove('expanded');
+            }
+        } else {
+            sidebar.classList.remove('hidden');
+            content.classList.remove('expanded');
+        }
+    });
+
+    // Close sidebar when clicking on nav links in mobile
+    document.querySelectorAll('.sidebar-nav a').forEach(link => {
+        link.addEventListener('click', function() {
+            if (window.innerWidth <= 768) {
+                closeSidebar();
+            }
+        });
+    });
+
+    // Add some interactive effects
+    document.querySelectorAll('.stat-card').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-10px) scale(1.02)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+        });
+    });
+</script>
+
+</body>
+</html>

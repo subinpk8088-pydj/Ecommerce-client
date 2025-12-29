@@ -1,0 +1,166 @@
+{% extends 'admin/base.html' %}
+
+{% block content %}
+{% if messages %}
+  <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+    {% for message in messages %}
+      <div class="toast show custom-toast align-items-center text-white shadow fade-in-slide" role="alert">
+        <div class="d-flex">
+          <div class="toast-body">
+            <i class="bi bi-check-circle-fill me-2"></i> {{ message }}
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<style>
+    /* Toast Styling */
+.custom-toast {
+    background-color: #48c78e; /* Modern soft green */
+    border-left: 4px solid #e8dbf2;
+    border-radius: 0.75rem;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.95rem;
+    animation: slideInTopRight 0.7s ease forwards;
+}
+
+/* Slide-in Animation */
+@keyframes slideInTopRight {
+    0% {
+        opacity: 0;
+        transform: translate(30px, -20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(0, 0);
+    }
+}
+
+</style>
+<h3 class="text-center mb-4 fade-in" style="animation-delay: 0.2s;">Registered Users</h3>
+
+<div class="row">
+    {% for user in users %}
+        <div class="col-md-6 col-lg-4 mb-4 fade-in" style="animation-delay: {{ forloop.counter0|add:"0.3"|floatformat:1 }}s;">
+            <div class="profile-card shadow-sm rounded-4">
+                <div class="profile-card-body d-flex flex-column justify-content-between h-100 p-3">
+                    <div class="d-flex align-items-center mb-3">
+                        <!-- Profile Image -->
+                        <div class="profile-image-container me-3">
+                            {% if user.profile_image %}
+                                <img src="{{ user.profile_image.url }}" alt="Profile Image" class="profile-image">
+                            {% else %}
+                                <div class="no-image">No Image</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- User Info -->
+                        <div class="profile-info">
+                            <h5 class="profile-username">{{ user.username }}</h5>
+                            <p class="profile-details">
+                                <strong>First:</strong> {{ user.first_name }}<br>
+                                <strong>Last:</strong> {{ user.last_name }}<br>
+                                <strong>Email:</strong> {{ user.email }}<br>
+                                <strong>Phone:</strong> {{ user.phone_number }}<br>
+                                <strong>Address:</strong> {{ user.address }}
+                            </p>
+                        </div>
+                    </div>
+                    <a href="{% url 'delete_user' user.id %}" class="btn btn-danger w-100 delete-btn">Delete</a>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+<!-- Page Styles -->
+<style>
+/* Animation */
+@keyframes fadeInUp {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+    opacity: 0;
+    animation: fadeInUp 0.6s ease forwards;
+}
+
+/* Profile Card */
+.profile-card {
+    background-color: #f9f6fb;
+    border: 1px solid #e4d4ef;
+    border-left: 5px solid #7c5295;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.profile-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 25px rgba(124, 82, 149, 0.15);
+}
+
+/* Image */
+.profile-image-container {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #fff;
+    border: 2px solid #ddd;
+}
+
+.profile-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.no-image {
+    width: 80px;
+    height: 80px;
+    line-height: 80px;
+    text-align: center;
+    background: #eee;
+    border-radius: 50%;
+    font-size: 0.8rem;
+    color: #888;
+}
+
+/* Text */
+.profile-info {
+    font-family: 'Nunito', sans-serif;
+    color: #444;
+}
+
+.profile-username {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #7c5295;
+    margin-bottom: 5px;
+}
+
+.profile-details {
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+/* Button */
+.delete-btn {
+    background-color: #7c5295;
+    border: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: background-color 0.3s ease;
+}
+
+.delete-btn:hover {
+    background-color: #5e3b76;
+}
+</style>
+
+<br><br><br><br><br><br><br><br><br>
+{% endblock %}

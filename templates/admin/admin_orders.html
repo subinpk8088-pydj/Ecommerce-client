@@ -1,0 +1,558 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+
+{% block title %}Order Management{% endblock %}
+{% block content %}
+
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --primary: #7c5295;
+        --primary-light: #9d73b6;
+        --primary-dark: #5b3d6e;
+        --white: #ffffff;
+        --light-bg: #f8f9fa;
+        --border-radius: 10px;
+        --shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    body {
+        font-family: 'Nunito', sans-serif;
+        background-color: var(--light-bg);
+    }
+
+    .content-wrapper {
+        padding: 2rem;
+    }
+
+    .page-header {
+        background-color: var(--primary);
+        color: var(--white);
+        padding: 1.5rem;
+        border-radius: var(--border-radius);
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow);
+    }
+
+    .stats-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        flex: 1;
+        min-width: 200px;
+        background-color: var(--white);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+        transition: transform 0.3s ease;
+        animation: slideIn 0.5s ease-out;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .stat-card .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary);
+    }
+
+    .stat-card .stat-label {
+        font-size: 0.9rem;
+        color: #6c757d;
+        text-transform: uppercase;
+    }
+
+    .stat-card .stat-icon {
+        font-size: 2.5rem;
+        color: var(--primary-light);
+        opacity: 0.2;
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+    }
+
+    .filters-container {
+        background-color: var(--white);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow);
+    }
+
+    .orders-table {
+        background-color: var(--white);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+    }
+
+    /* Responsive table styles */
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        scrollbar-color: var(--primary-light) var(--light-bg);
+    }
+    
+    /* Custom scrollbar for Webkit browsers */
+    .table-responsive::-webkit-scrollbar {
+        height: 6px;
+    }
+    
+    .table-responsive::-webkit-scrollbar-track {
+        background: var(--light-bg);
+    }
+    
+    .table-responsive::-webkit-scrollbar-thumb {
+        background-color: var(--primary-light);
+        border-radius: 6px;
+    }
+
+    .orders-table thead {
+        background-color: var(--primary);
+        color: var(--white);
+    }
+
+    .orders-table th, .orders-table td {
+        padding: 1rem;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+
+    .orders-table tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+    .orders-table tbody tr:hover {
+        background-color: rgba(124, 82, 149, 0.05);
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 30px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .status-delivered {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .status-shipping {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    .status-processing {
+        background-color: #cce5ff;
+        color: #004085;
+    }
+
+    .btn-purple {
+        background-color: var(--primary);
+        color: var(--white);
+        border-radius: 30px;
+        padding: 0.5rem 1rem;
+        border: none;
+        transition: all 0.3s ease;
+    }
+
+    .btn-purple:hover {
+        background-color: var(--primary-dark);
+        color: var(--white);
+        transform: translateY(-2px);
+    }
+
+    .pagination {
+        margin-top: 2rem;
+        justify-content: center;
+    }
+
+    .page-link {
+        color: var(--primary);
+        border-radius: 50%;
+        margin: 0 0.2rem;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .page-item.active .page-link {
+        background-color: var(--primary);
+        border-color: var(--primary);
+    }
+
+    .modal-content {
+        border-radius: var(--border-radius);
+    }
+
+    .modal-header {
+        background-color: var(--primary);
+        color: var(--white);
+        border-radius: var(--border-radius) var(--border-radius) 0 0;
+    }
+
+    .modal-footer {
+        border-top: none;
+    }
+
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    /* Mobile-specific styles */
+    @media (max-width: 768px) {
+        .content-wrapper {
+            padding: 1rem;
+        }
+        
+        .page-header {
+            padding: 1rem;
+        }
+        
+        .stat-card {
+            width: 100%;
+            min-width: unset;
+            margin-bottom: 1rem;
+        }
+        
+        .table-responsive-container {
+            position: relative;
+        }
+        
+        .table-scroll-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+            font-size: 0.8rem;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+    }
+</style>
+
+<div class="content-wrapper">
+    <div class="page-header">
+        <h1><i class="fas fa-shopping-bag mr-2"></i>Order Management</h1>
+        <p class="lead mb-0">View, update and manage all customer orders</p>
+    </div>
+
+    <div class="stats-container" style="display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem; justify-content: space-between;">
+        <!-- Total Orders Card -->
+        <div class="stat-card position-relative" style="background-color: #f8f1f9; border-radius: 15px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); padding: 20px; width: 200px; text-align: center; transition: transform 0.3s ease-in-out; opacity: 0; animation: fadeIn 1s forwards;">
+            <div class="stat-value" style="font-size: 24px; font-weight: bold; color: #7c5295;">{{ total_orders }}</div>
+            <div class="stat-label" style="font-size: 14px; color: #7c5295;">Total Orders</div>
+            <i class="fas fa-shopping-cart stat-icon" style="font-size: 30px; color: #7c5295;"></i>
+        </div>
+
+        <!-- Pending Orders Card -->
+        <div class="stat-card position-relative" style="background-color: #f8f1f9; border-radius: 15px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); padding: 20px; width: 200px; text-align: center; transition: transform 0.3s ease-in-out; opacity: 0; animation: fadeIn 1.2s forwards;">
+            <div class="stat-value" style="font-size: 24px; font-weight: bold; color: #7c5295;">{{ pending_orders }}</div>
+            <div class="stat-label" style="font-size: 14px; color: #7c5295;">Pending Orders</div>
+            <i class="fas fa-clock stat-icon" style="font-size: 30px; color: #7c5295;"></i>
+        </div>
+
+        <!-- Delivered Orders Card -->
+        <div class="stat-card position-relative" style="background-color: #f8f1f9; border-radius: 15px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); padding: 20px; width: 200px; text-align: center; transition: transform 0.3s ease-in-out; opacity: 0; animation: fadeIn 1.4s forwards;">
+            <div class="stat-value" style="font-size: 24px; font-weight: bold; color: #7c5295;">{{ delivered_orders }}</div>
+            <div class="stat-label" style="font-size: 14px; color: #7c5295;">Delivered Orders</div>
+            <i class="fas fa-check-circle stat-icon" style="font-size: 30px; color: #7c5295;"></i>
+        </div>
+
+        <!-- Total Revenue Card -->
+        <div class="stat-card position-relative" style="background-color: #f8f1f9; border-radius: 15px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); padding: 20px; width: 200px; text-align: center; transition: transform 0.3s ease-in-out; opacity: 0; animation: fadeIn 1.6s forwards;">
+            <div class="stat-value" style="font-size: 24px; font-weight: bold; color: #7c5295;">${{ total_revenue }}</div>
+            <div class="stat-label" style="font-size: 14px; color: #7c5295;">Total Revenue</div>
+            <i class="fas fa-dollar-sign stat-icon" style="font-size: 30px; color: #7c5295;"></i>
+        </div>
+    </div>
+
+    <!-- Add custom animation for fade-in -->
+    <style>
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        .stat-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Responsive Design for Mobile */
+        @media (max-width: 768px) {
+            .stat-card {
+                width: 100%;  /* Cards take full width on mobile */
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+
+    <div class="filters-container">
+        <form method="get" class="row align-items-end">
+            <div class="col-md-3 mb-3">
+                <label for="status">Order Status</label>
+                <select name="status" id="status" class="form-control">
+                    <option value="">All Statuses</option>
+                    <option value="processing" {% if request.GET.status == "processing" %}selected{% endif %}>Processing</option>
+                    <option value="shipping" {% if request.GET.status == "shipping" %}selected{% endif %}>Shipping</option>
+                    <option value="delivered" {% if request.GET.status == "delivered" %}selected{% endif %}>Delivered</option>
+                </select>
+            </div>
+            
+            <div class="col-md-3 mb-3">
+                <label for="date_from">From Date</label>
+                <input type="date" name="date_from" id="date_from" class="form-control" value="{{ request.GET.date_from }}">
+            </div>
+            
+            <div class="col-md-3 mb-3">
+                <label for="date_to">To Date</label>
+                <input type="date" name="date_to" id="date_to" class="form-control" value="{{ request.GET.date_to }}">
+            </div>
+            
+            <div class="col-md-3 mb-3">
+                <button type="submit" class="btn btn-purple w-100">
+                    <i class="fas fa-filter mr-2"></i>Apply Filters
+                </button>
+            </div>
+        </form>
+    </div>
+
+    {% if orders %}
+        <div class="table-responsive-container">
+            <!-- Mobile scroll indicator -->
+            <div class="table-scroll-indicator d-md-none">
+                <span><i class="fas fa-arrows-alt-h mr-1"></i>Swipe to view all data</span>
+            </div>
+            <!-- Responsive table wrapper -->
+            <div class="table-responsive orders-table">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Product</th>
+                            <th>Quantity</th>
+                            <th>Total</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                            <tr>
+                                <td><strong>#{{ order.id }}</strong></td>
+                                <td>{{ order.user.get_full_name|default:order.user.username }}</td>
+                                <td>{{ order.product.name }}</td>
+                                <td>{{ order.quantity|default:"1" }}</td>
+                                <td>${{ order.product.price|floatformat:2 }}</td>
+                                <td>{{ order.date_bought|date:"M d, Y" }}</td>
+                                <td>
+                                    {% if order.status == 'delivered' %}
+                                        <span class="status-badge status-delivered">Delivered</span>
+                                    {% elif order.status == 'shipping' %}
+                                        <span class="status-badge status-shipping">Shipping</span>
+                                    {% else %}
+                                        <span class="status-badge status-processing">Processing</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-purple view-order" data-toggle="modal" data-target="#orderModal" data-order-id="{{ order.id }}">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-purple update-status" data-toggle="modal" data-target="#statusModal" data-order-id="{{ order.id }}">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Pagination -->
+        {% if orders.has_other_pages %}
+            <nav>
+                <ul class="pagination">
+                    {% if orders.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ orders.previous_page_number }}" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for i in orders.paginator.page_range %}
+                        {% if orders.number == i %}
+                            <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                        {% else %}
+                            <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if orders.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ orders.next_page_number }}" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    {% else %}
+        <div class="alert alert-info text-center p-5">
+            <i class="fas fa-info-circle fa-3x mb-3"></i>
+            <h4>No orders found</h4>
+            <p>There are no orders matching your filters.</p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Order Details Modal -->
+<div class="modal fade" id="orderModal" tabindex="-1" role="dialog" aria-labelledby="orderModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="orderModalLabel">Order Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="orderDetails">
+                    <!-- Order details will be loaded here via AJAX -->
+                    <div class="text-center p-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Update Status Modal -->
+<div class="modal fade" id="statusModal" tabindex="-1" role="dialog" aria-labelledby="statusModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="statusModalLabel">Update Order Status</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="updateStatusForm" method="post" action="{% url 'admin_update_order_status' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <input type="hidden" name="order_id" id="orderIdInput">
+
+                    <div class="form-group">
+                        <label for="statusSelect">Select Status</label>
+                        <select class="form-control" id="statusSelect" name="status">
+                            <option value="processing">Processing</option>
+                            <option value="shipping">Shipping</option>
+                            <option value="delivered">Delivered</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="notesInput">Notes (Optional)</label>
+                        <textarea class="form-control" id="notesInput" name="notes" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-purple">Update Status</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        // Animation on page load
+        $('.stat-card').each(function(index) {
+            $(this).css('animation-delay', (index * 0.1) + 's');
+        });
+        
+        // View order details
+        $('.view-order').on('click', function() {
+            const orderId = $(this).data('order-id');
+            $('#orderDetails').html('<div class="text-center p-5"><div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div></div>');
+            
+            // AJAX call to get order details
+            $.ajax({
+                url: '{% url "admin_order_details" %}',
+                data: { 'order_id': orderId },
+                success: function(data) {
+                    $('#orderDetails').html(data);
+                },
+                error: function() {
+                    $('#orderDetails').html('<div class="alert alert-danger">Error loading order details.</div>');
+                }
+            });
+        });
+        
+        // Update status modal
+        $('.update-status').on('click', function() {
+            const orderId = $(this).data('order-id');
+            $('#orderIdInput').val(orderId);
+        });
+        
+        // Check if table needs scrolling indicator on mobile
+        function checkTableOverflow() {
+            var tableWidth = $('.table').width();
+            var containerWidth = $('.table-responsive').width();
+            
+            if (tableWidth > containerWidth) {
+                $('.table-scroll-indicator').show();
+            } else {
+                $('.table-scroll-indicator').hide();
+            }
+        }
+        
+        // Run on page load and resize
+        checkTableOverflow();
+        $(window).resize(function() {
+            checkTableOverflow();
+        });
+        
+        // Hide scroll indicator after user has scrolled
+        $('.table-responsive').on('scroll', function() {
+            $('.table-scroll-indicator').fadeOut(500);
+        });
+    });
+</script>
+
+{% endblock %}

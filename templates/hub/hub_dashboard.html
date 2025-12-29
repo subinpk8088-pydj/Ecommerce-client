@@ -1,0 +1,125 @@
+{% extends 'hub/hub_base.html' %}
+{% block content %}
+
+<!-- Dashboard Stats -->
+    <div class="dashboard-grid">
+        <div class="stat-card">
+            <div class="stat-icon primary">
+                <i class="fas fa-code-branch"></i>
+            </div>
+            <div class="stat-number">24</div>
+            <div class="stat-label">Active Branches</div>
+            <div class="stat-change positive">
+                <i class="fas fa-arrow-up"></i>
+                <span>+12% from last month</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon secondary">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-number">156</div>
+            <div class="stat-label">Delivery Agents</div>
+            <div class="stat-change positive">
+                <i class="fas fa-arrow-up"></i>
+                <span>+8% from last month</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon accent">
+                <i class="fas fa-box"></i>
+            </div>
+            <div class="stat-number">2,847</div>
+            <div class="stat-label">Total Deliveries</div>
+            <div class="stat-change positive">
+                <i class="fas fa-arrow-up"></i>
+                <span>+23% from last month</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon success">
+                <i class="fas fa-dollar-sign"></i>
+            </div>
+            <div class="stat-number">$52,340</div>
+            <div class="stat-label">Monthly Revenue</div>
+            <div class="stat-change positive">
+                <i class="fas fa-arrow-up"></i>
+                <span>+15% from last month</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart Section -->
+    <div class="chart-section">
+        <div class="chart-header">
+            <h3 class="chart-title">
+                <i class="fas fa-chart-area"></i>
+                Performance Analytics
+            </h3>
+            <div class="filter-buttons">
+                <button class="filter-btn active" onclick="setActiveFilter(this)">7 Days</button>
+                <button class="filter-btn" onclick="setActiveFilter(this)">30 Days</button>
+                <button class="filter-btn" onclick="setActiveFilter(this)">3 Months</button>
+                <button class="filter-btn" onclick="setActiveFilter(this)">Year</button>
+            </div>
+        </div>
+        <div class="chart-placeholder">
+            <i class="fas fa-chart-line" style="font-size: 3rem; margin-right: 1rem; color: var(--primary);"></i>
+            <div>
+                <div style="font-size: 1.3rem; font-weight: 600; margin-bottom: 0.5rem;">Analytics Chart</div>
+                <div>Interactive performance metrics will be displayed here</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="activity-section">
+        <h3 class="chart-title" style="margin-bottom: 2rem;">
+            <i class="fas fa-clock"></i>
+            Recent Activity
+        </h3>
+        
+        <div class="activity-item">
+            <div class="activity-icon" style="background: linear-gradient(135deg, var(--success), #6bc7a4);">
+                <i class="fas fa-plus"></i>
+            </div>
+            <div class="activity-content">
+                <div class="activity-title">New branch added in Downtown</div>
+                <div class="activity-time">2 hours ago</div>
+            </div>
+        </div>
+
+        <div class="activity-item">
+            <div class="activity-icon" style="background: linear-gradient(135deg, var(--primary), var(--primary-light));">
+                <i class="fas fa-user-plus"></i>
+            </div>
+            <div class="activity-content">
+                <div class="activity-title">5 new delivery agents onboarded</div>
+                <div class="activity-time">4 hours ago</div>
+            </div>
+        </div>
+
+        <div class="activity-item">
+            <div class="activity-icon" style="background: linear-gradient(135deg, var(--accent), #7ed9e3);">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="activity-content">
+                <div class="activity-title">Monthly report generated</div>
+                <div class="activity-time">6 hours ago</div>
+            </div>
+        </div>
+
+        <div class="activity-item">
+            <div class="activity-icon" style="background: linear-gradient(135deg, var(--secondary), #ff9ec7);">
+                <i class="fas fa-cog"></i>
+            </div>
+            <div class="activity-content">
+                <div class="activity-title">System maintenance completed</div>
+                <div class="activity-time">1 day ago</div>
+            </div>
+        </div>
+
+{% endblock %}

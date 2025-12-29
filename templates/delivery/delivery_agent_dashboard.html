@@ -1,0 +1,115 @@
+{% extends 'delivery/delivery_base_dashboard.html' %}
+
+{% block content %}
+<div class="main-content">
+        <!-- Welcome Section -->
+        <div class="welcome-section">
+            <h1 class="welcome-title">
+    <i class="fas fa-tachometer-alt"></i>
+    Welcome to Your Delivery Panel
+</h1>
+<p class="welcome-subtitle">
+    Manage your activities, track progress, and stay organized with our comprehensive dashboard.
+</p>
+
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-header">
+                   <div class="stat-icon primary">
+    <i class="fas fa-box"></i>
+</div>
+</div>
+<div class="stat-number">1,234</div>
+<div class="stat-label">Total Deliveries</div>
+
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon secondary">
+    <i class="fas fa-shipping-fast"></i>
+</div>
+</div>
+<div class="stat-number">89%</div>
+<div class="stat-label">Delivery Rate</div>
+
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon accent">
+    <i class="fas fa-truck-loading"></i>
+</div>
+</div>
+<div class="stat-number">567</div>
+<div class="stat-label">Active Deliveries</div>
+
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon success">
+    <i class="fas fa-dollar-sign"></i>
+</div>
+</div>
+<div class="stat-number">$12.5K</div>
+<div class="stat-label">Earnings</div>
+
+            </div>
+        </div>
+
+        <!-- Action Cards -->
+        <div class="action-cards">
+            <div class="action-card">
+    <div class="action-header">
+        <div class="action-icon primary">
+            <i class="fas fa-plus-circle"></i>
+        </div>
+        <h3 class="action-title">Add New Delivery</h3>
+    </div>
+    <p class="action-description">
+        Start a new delivery and collaborate with your team members to achieve your goals.
+    </p>
+    <a href="#" class="action-btn">
+        <i class="fas fa-arrow-right"></i>
+        Get Started
+    </a>
+</div>
+
+<div class="action-card">
+    <div class="action-header">
+        <div class="action-icon secondary">
+            <i class="fas fa-chart-bar"></i>
+        </div>
+        <h3 class="action-title">Track Deliveries</h3>
+    </div>
+    <p class="action-description">
+        Analyze your performance metrics and gain insights into your business operations.
+    </p>
+    <a href="#" class="action-btn">
+        <i class="fas fa-arrow-right"></i>
+        View Reports
+    </a>
+</div>
+
+<div class="action-card">
+    <div class="action-header">
+        <div class="action-icon accent">
+            <i class="fas fa-cog"></i>
+        </div>
+        <h3 class="action-title">Delivery Settings</h3>
+    </div>
+    <p class="action-description">
+        Configure your account settings and customize your dashboard experience.
+    </p>
+    <a href="#" class="action-btn">
+        <i class="fas fa-arrow-right"></i>
+        Open Settings
+    </a>
+</div>
+        </div>
+</div>
+{% endblock %}

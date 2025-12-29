@@ -1,0 +1,46 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+{% block content %}
+
+<form id="agentForm" method="post">
+  {% csrf_token %}
+  
+  <select name="hub" class="form-control" required>
+    <option value="">-- Select HUB --</option>
+    {% for hub in hubs %}
+      <option value="{{ hub.id }}">{{ hub.name }}</option>
+    {% endfor %}
+  </select>
+  
+  <input type="text" name="name" class="form-control" placeholder="Name" required>
+  <input type="tel" name="phone" class="form-control" placeholder="Phone" required>
+  <input type="email" name="email" class="form-control" placeholder="Email" required>
+  <input type="text" name="address" class="form-control" placeholder="Address" required>
+  <input type="text" name="vehicle_number" class="form-control" placeholder="Vehicle Number" required>
+  <input type="text" name="license" class="form-control" placeholder="License" required>
+
+  <button type="submit" class="btn btn-primary">Add Delivery Agent</button>
+</form>
+
+<script>
+document.getElementById("agentForm").addEventListener("submit", function(e){
+    e.preventDefault();
+    const formData = new FormData(this);
+    fetch("{% url 'add_delivery_agent' %}", {
+        method: 'POST',
+        headers: {'X-CSRFToken': '{{ csrf_token }}'},
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.error) {
+            alert(data.error);
+        } else {
+            alert(data.message);
+            this.reset();
+        }
+    });
+});
+</script>
+
+{% endblock %}

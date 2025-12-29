@@ -1,0 +1,285 @@
+{% extends 'admin/base.html' %}
+{% block content %}
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+
+<!-- Custom Styles -->
+<style>
+    body {
+        font-family: 'Nunito', sans-serif;
+        background-color: #f4f1f7;
+    }
+
+    h2 {
+        color: #7c5295;
+        font-weight: 700;
+        margin-bottom: 30px;
+    }
+
+    .table {
+        background-color: #fff;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(124, 82, 149, 0.1);
+        border: none;
+    }
+
+    .table th {
+        background-color: #7c5295;
+        color: #fff;
+        font-weight: 600;
+        border: none;
+        padding: 15px;
+    }
+
+    .table td {
+        vertical-align: middle;
+        text-align: center;
+        padding: 12px 15px;
+        border: none;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f8f4fb;
+        transform: translateY(-1px);
+        transition: all 0.2s ease;
+    }
+
+    .table tbody tr {
+        transition: all 0.2s ease;
+    }
+
+    .price-cell {
+        font-weight: 600;
+        color: #7c5295;
+        font-size: 1.1rem;
+    }
+
+    .user-cell {
+        font-weight: 600;
+        color: #333;
+    }
+
+    .product-cell {
+        color: #555;
+        font-weight: 500;
+    }
+
+    .date-cell {
+        color: #666;
+        font-size: 0.95rem;
+    }
+
+    /* Pagination Styling */
+    .pagination {
+        text-align: center;
+        margin-top: 30px;
+    }
+
+    .step-links {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #fff;
+        padding: 15px 25px;
+        border-radius: 50px;
+        box-shadow: 0 4px 15px rgba(124, 82, 149, 0.1);
+    }
+
+    .step-links a {
+        color: #7c5295;
+        font-weight: 600;
+        padding: 8px 16px;
+        border: 2px solid #7c5295;
+        border-radius: 25px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-block;
+        min-width: 80px;
+    }
+
+    .step-links a:hover {
+        background-color: #7c5295;
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(124, 82, 149, 0.3);
+    }
+
+    .current {
+        font-weight: 700;
+        color: #7c5295;
+        margin: 0 15px;
+        padding: 8px 16px;
+        background-color: #ede2f5;
+        border-radius: 25px;
+        border: 2px solid #7c5295;
+    }
+
+    .no-data-message {
+        background-color: #fff;
+        color: #7c5295;
+        text-align: center;
+        padding: 40px;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(124, 82, 149, 0.1);
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    .container {
+        animation: fadeIn 0.8s ease-in-out;
+        max-width: 1200px;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Stats Cards */
+    .stats-row {
+        margin-bottom: 30px;
+    }
+
+    .stat-card {
+        background: linear-gradient(135deg, #7c5295 0%, #68437b 100%);
+        color: #fff;
+        padding: 20px;
+        border-radius: 16px;
+        text-align: center;
+        box-shadow: 0 4px 20px rgba(124, 82, 149, 0.2);
+        margin-bottom: 15px;
+    }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .table-responsive {
+            border-radius: 16px;
+        }
+        
+        .step-links {
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .step-links a {
+            min-width: 120px;
+        }
+        
+        h2 {
+            font-size: 1.5rem;
+            text-align: center;
+        }
+    }
+
+    /* Loading Animation */
+    .table tbody tr {
+        animation: slideUp 0.5s ease-out;
+        animation-fill-mode: both;
+    }
+
+    .table tbody tr:nth-child(1) { animation-delay: 0.1s; }
+    .table tbody tr:nth-child(2) { animation-delay: 0.2s; }
+    .table tbody tr:nth-child(3) { animation-delay: 0.3s; }
+    .table tbody tr:nth-child(4) { animation-delay: 0.4s; }
+    .table tbody tr:nth-child(5) { animation-delay: 0.5s; }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<div class="container mt-4">
+    <h2>📊 All User Orders</h2>
+    
+    {% if purchases %}
+        <!-- Stats Cards -->
+        <div class="row stats-row">
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-number">{{ purchases.paginator.count }}</div>
+                    <div class="stat-label">Total Orders</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-number">{{ purchases.paginator.num_pages }}</div>
+                    <div class="stat-label">Total Pages</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-number">{{ purchases|length }}</div>
+                    <div class="stat-label">Orders This Page</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Orders Table -->
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>👤 User</th>
+                        <th>📦 Product</th>
+                        <th>💰 Price</th>
+                        <th>📅 Date Bought</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in purchases %}
+                    <tr>
+                        <td class="user-cell">{{ item.user.username }}</td>
+                        <td class="product-cell">{{ item.product.name }}</td>
+                        <td class="price-cell">₹{{ item.get_total_price_with_gst }}</td>
+                        <td class="date-cell">{{ item.date_bought|date:"M d, Y H:i" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination">
+            <span class="step-links">
+                {% if purchases.has_previous %}
+                    <a href="?page=1">⏮️ First</a>
+                    <a href="?page={{ purchases.previous_page_number }}">⬅️ Previous</a>
+                {% endif %}
+                
+                <span class="current">
+                    Page {{ purchases.number }} of {{ purchases.paginator.num_pages }}
+                </span>
+                
+                {% if purchases.has_next %}
+                    <a href="?page={{ purchases.next_page_number }}">Next ➡️</a>
+                    <a href="?page={{ purchases.paginator.num_pages }}">Last ⏭️</a>
+                {% endif %}
+            </span>
+        </div>
+    {% else %}
+        <div class="no-data-message">
+            🚫 No purchases found.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

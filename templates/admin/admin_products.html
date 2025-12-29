@@ -1,0 +1,13 @@
+{% extends 'admin/base.html' %}
+{% block content %}
+<h3>Products</h3>
+<a href="{% url 'add_product' %}" class="btn btn-primary">Add Product</a>
+<ul>
+    {% for product in products %}
+        <li>{{ product.name }} - {{ product.price }} 
+            <a href="{% url 'edit_product' product.id %}">Edit</a>
+            <a href="{% url 'delete_product' product.id %}">Delete</a>
+        </li>
+    {% endfor %}
+</ul>
+{% endblock %}

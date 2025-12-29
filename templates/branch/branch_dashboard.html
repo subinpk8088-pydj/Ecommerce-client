@@ -1,0 +1,187 @@
+{% extends 'branch/branch_base.html' %}
+{% block content %}
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    body {
+        font-family: 'Nunito', sans-serif;
+    }
+
+    .card-box, .info-card {
+        background-color: #fff;
+        border-radius: 1rem;
+        box-shadow: 0 4px 12px rgba(124, 82, 149, 0.15);
+        padding: 1.5rem;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        animation: fadeInUp 0.6s ease both;
+    }
+
+    .card-box:hover, .info-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 16px rgba(124, 82, 149, 0.25);
+    }
+
+    .info-card h6 {
+        font-size: 1rem;
+        color: #7c5295;
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+    }
+
+    .info-card p {
+        font-size: 1.4rem;
+        font-weight: bold;
+        color: #333;
+        margin: 0;
+    }
+
+    .info-icon {
+        font-size: 1.8rem;
+        color: #7c5295;
+        margin-right: 10px;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<!-- Top Info Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-md-6 col-lg-3">
+        <div class="info-card d-flex align-items-center">
+            <i class="fas fa-box info-icon"></i>
+            <div>
+                <h6>Today's Deliveries</h6>
+                <p>24</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="info-card d-flex align-items-center">
+            <i class="fas fa-truck info-icon"></i>
+            <div>
+                <h6>Active Agents</h6>
+                <p>12</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="info-card d-flex align-items-center">
+            <i class="fas fa-clock info-icon"></i>
+            <div>
+                <h6>Pending Deliveries</h6>
+                <p>8</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="info-card d-flex align-items-center">
+            <i class="fas fa-check-circle info-icon"></i>
+            <div>
+                <h6>Completed</h6>
+                <p>16</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart Cards -->
+<div class="row g-4">
+    <div class="col-md-6 col-lg-6">
+        <div class="card-box">
+            <h6 class="mb-2">Branch Stats</h6>
+            <canvas id="branchStatsChart" height="150"></canvas>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-6">
+        <div class="card-box">
+            <h6 class="mb-2">Performance</h6>
+            <canvas id="performanceChart" height="150"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js Script -->
+<script>
+    const branchStatsCtx = document.getElementById('branchStatsChart').getContext('2d');
+    const performanceCtx = document.getElementById('performanceChart').getContext('2d');
+
+    new Chart(branchStatsCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+            datasets: [{
+                label: "Today's Deliveries",
+                data: [12, 19, 8, 15, 10],
+                backgroundColor: '#7c5295',
+                borderRadius: 10,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { color: '#7c5295' }
+                },
+                x: {
+                    ticks: { color: '#7c5295' }
+                }
+            }
+        }
+    });
+
+    new Chart(performanceCtx, {
+        type: 'line',
+        data: {
+            labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+            datasets: [{
+                label: 'Agent Performance',
+                data: [70, 85, 60, 90],
+                borderColor: '#7c5295',
+                backgroundColor: 'rgba(124, 82, 149, 0.1)',
+                tension: 0.4,
+                fill: true,
+                pointRadius: 5,
+                pointBackgroundColor: '#7c5295',
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#7c5295'
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    ticks: { color: '#7c5295' }
+                },
+                x: {
+                    ticks: { color: '#7c5295' }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

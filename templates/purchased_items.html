@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block title %}Purchased Items{% endblock %}
+{% block content %}
+{% if messages %}
+  <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+    {% for message in messages %}
+      <div class="toast show custom-toast align-items-center text-white shadow fade-in-slide" role="alert">
+        <div class="d-flex">
+          <div class="toast-body">
+            <i class="bi bi-check-circle-fill me-2"></i> {{ message }}
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<style>
+    /* Toast Styling */
+.custom-toast {
+    background-color: #48c78e; /* Modern soft green */
+    border-left: 4px solid #e8dbf2;
+    border-radius: 0.75rem;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.95rem;
+    animation: slideInTopRight 0.7s ease forwards;
+}
+
+/* Slide-in Animation */
+@keyframes slideInTopRight {
+    0% {
+        opacity: 0;
+        transform: translate(30px, -20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(0, 0);
+    }
+}
+
+</style>
+<div class="container py-5">
+  <h2 class="text-center mb-4">My Purchases</h2>
+  <div class="row">
+    {% for item in purchases %}
+      <div class="col-md-4 mb-3">
+        <div class="card shadow-sm h-100">
+          <img src="{{ item.product.image.url }}" class="card-img-top" alt="{{ item.product.name }}">
+          <div class="card-body">
+            <h5 class="card-title">{{ item.product.name }}</h5>
+            <p class="card-text">{{ item.product.description|truncatewords:15 }}</p>
+            <p><strong>Price:</strong> ₹{{ item.product.price }}</p>
+            <p><strong>Date:</strong> {{ item.date|date:"M d, Y" }}</p>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <p class="text-center">You haven't purchased any items yet.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

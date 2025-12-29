@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Toast for Success/Alert Messages -->
+{% if messages %}
+  <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+    {% for message in messages %}
+      <div class="toast show custom-toast align-items-center text-white shadow fade-in-slide" role="alert">
+        <div class="d-flex">
+          <div class="toast-body">
+            {% if message.tags == 'error' %}
+            <i class="bi bi-exclamation-circle-fill me-2"></i>
+            {% else %}
+            <i class="bi bi-check-circle-fill me-2"></i>
+            {% endif %}
+            {{ message }}
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+    body {
+        font-family: 'Nunito', sans-serif;
+        background: #f9f4fb;
+    }
+
+    .registration-box {
+        background: white;
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 8px 30px rgba(124, 82, 149, 0.15);
+        margin: 60px auto;
+        animation: slideUp 0.7s ease-in-out both;
+    }
+
+    h2 {
+        color: #7c5295;
+        font-weight: 700;
+    }
+
+    .form-control {
+        border-radius: 12px;
+        border: 1px solid #d3cbe0;
+    }
+
+    .form-control:focus {
+        border-color: #7c5295;
+        box-shadow: 0 0 6px rgba(124, 82, 149, 0.4);
+    }
+
+    .btn-primary {
+        background-color: #7c5295;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background-color: #68427d;
+    }
+
+    .custom-toast {
+        background-color: #7c5295;
+        border-left: 4px solid #e0c5f5;
+        border-radius: 0.75rem;
+        font-family: 'Nunito', sans-serif;
+        font-size: 0.95rem;
+        animation: fadeIn 0.7s ease forwards;
+    }
+
+    .fade-in-slide {
+        animation: slideInTopRight 0.7s ease forwards;
+    }
+
+    @keyframes slideInTopRight {
+        0% {
+            opacity: 0;
+            transform: translate(30px, -20px);
+        }
+        100% {
+            opacity: 1;
+            transform: translate(0, 0);
+        }
+    }
+
+    @keyframes slideUp {
+        0% {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #5e4476;
+    }
+
+    .invalid-feedback {
+        font-size: 0.85rem;
+        color: #dc3545;
+    }
+
+    .is-valid {
+        border-color: #198754;
+    }
+
+    .is-invalid {
+        border-color: #dc3545;
+    }
+    
+    .form-check-input:checked {
+        background-color: #7c5295;
+        border-color: #7c5295;
+    }
+    
+    .form-check-label {
+        font-weight: 500;
+        color: #5e4476;
+    }
+</style>
+
+<div class="container" style="max-width: 600px;">
+    <div class="registration-box">
+        <h2 class="text-center mb-4">Customer Registration</h2>
+
+        <form method="post" enctype="multipart/form-data" onsubmit="return validateForm();">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label">First Name</label>
+                <input type="text" name="first_name" class="form-control" placeholder="Enter your first name" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Last Name</label>
+                <input type="text" name="last_name" class="form-control" placeholder="Enter your last name" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Username</label>
+                <input type="text" name="username" class="form-control" placeholder="Choose a username" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input type="email" name="email" id="email" class="form-control" placeholder="Enter your email" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Phone Number</label>
+                <input type="text" name="phone_number" class="form-control" placeholder="Enter phone number" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Address</label>
+                <textarea name="address" class="form-control" rows="2" placeholder="Enter address" required></textarea>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Profile Image</label>
+                <input type="file" name="profile_image" accept="image/*" class="form-control" required>
+            </div>
+            <div class="mb-3 form-check">
+                <input type="checkbox" name="is_dealer" class="form-check-input" id="isDealer">
+                <label class="form-check-label" for="isDealer">Register as Dealer/Distributor</label>
+            </div>
+
+            <div class="d-grid">
+                <input type="submit" value="Register" class="btn btn-primary py-2">
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function debounce(func, delay = 500) {
+    let timeout;
+    return (...args) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), delay);
+    };
+}
+
+function showValidationMessage(input, message, isValid) {
+    let feedback = input.nextElementSibling;
+    if (!feedback || !feedback.classList.contains("invalid-feedback")) {
+        feedback = document.createElement("div");
+        feedback.classList.add("invalid-feedback");
+        input.parentNode.appendChild(feedback);
+    }
+    feedback.textContent = message;
+    input.classList.toggle("is-invalid", !isValid);
+    input.classList.toggle("is-valid", isValid);
+}
+
+function validateField(input, field) {
+    const value = input.value;
+    fetch(`/validate/?field=${field}&value=${encodeURIComponent(value)}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.valid) {
+                showValidationMessage(input, "", true);
+            } else {
+                showValidationMessage(input, data.message, false);
+            }
+        });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    const username = document.querySelector("input[name='username']");
+    const email = document.querySelector("input[name='email']");
+    const phone = document.querySelector("input[name='phone_number']");
+
+    username.addEventListener("input", debounce(() => validateField(username, 'username')));
+    email.addEventListener("input", debounce(() => validateField(email, 'email')));
+    phone.addEventListener("input", debounce(() => validateField(phone, 'phone_number')));
+});
+</script>
+{% endblock %}

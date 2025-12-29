@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dealer Panel</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #7c5295;
+            --primary-light: #9d74b5;
+            --primary-dark: #5e3d75;
+            --secondary: #f8f4fc;
+            --text-dark: #343a40;
+            --text-light: #f8f9fa;
+            --gray-light: #e9ecef;
+            --gray-medium: #adb5bd;
+        }
+        
+        body {
+            font-family: 'Nunito', sans-serif;
+            display: flex;
+            min-height: 100vh;
+            background-color: var(--secondary);
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 20px 0;
+            position: fixed;
+            height: 100vh;
+            transition: all 0.3s ease;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+        
+        .sidebar-brand {
+            padding: 15px 25px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .sidebar-brand h3 {
+            margin: 0;
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+        
+        .sidebar-menu {
+            padding: 0;
+            list-style: none;
+        }
+        
+        .sidebar-menu li {
+            margin-bottom: 5px;
+        }
+        
+        .sidebar-menu a {
+            color: rgba(255,255,255,0.85);
+            display: flex;
+            align-items: center;
+            padding: 12px 25px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background-color: rgba(255,255,255,0.1);
+            color: white;
+            border-left: 4px solid white;
+        }
+        
+        .sidebar-menu i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            transition: all 0.3s ease;
+        }
+        
+        /* Topbar Styles */
+        .topbar {
+            background-color: white;
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 900;
+        }
+        
+        .toggle-sidebar {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: none;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-light);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-right: 10px;
+        }
+        
+        .logout-btn {
+            background-color: white;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            transition: all 0.3s ease;
+            margin-left: 15px;
+        }
+        
+        .logout-btn:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        /* Content Area Styles */
+        .content-wrapper {
+            padding: 30px;
+        }
+        
+        .page-title {
+            margin-bottom: 30px;
+            font-weight: 700;
+            color: var(--primary);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 0.6s ease forwards;
+        }
+        
+        /* Cards Styles */
+        .dashboard-card {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            padding: 25px;
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        .card-icon {
+            background-color: var(--secondary);
+            color: var(--primary);
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+        
+        .card-title {
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            color: var(--text-dark);
+        }
+        
+        .card-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+        
+        .card-footer {
+            display: flex;
+            align-items: center;
+            margin-top: 15px;
+            color: var(--gray-medium);
+            font-size: 0.9rem;
+        }
+        
+        .recent-activity {
+            margin-top: 30px;
+        }
+        
+        .activity-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--gray-light);
+        }
+        
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background-color: var(--secondary);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+        }
+        
+        .activity-details {
+            flex: 1;
+        }
+        
+        .activity-title {
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+        
+        .activity-time {
+            font-size: 0.85rem;
+            color: var(--gray-medium);
+        }
+        
+        .activity-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .status-completed {
+            background-color: #e6f7ee;
+            color: #0da95c;
+        }
+        
+        .status-pending {
+            background-color: #fff4e5;
+            color: #f5a623;
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Apply animations to cards */
+        .dashboard-card:nth-child(1) {
+            animation: fadeIn 0.4s ease forwards 0.1s;
+        }
+        
+        .dashboard-card:nth-child(2) {
+            animation: fadeIn 0.4s ease forwards 0.2s;
+        }
+        
+        .dashboard-card:nth-child(3) {
+            animation: fadeIn 0.4s ease forwards 0.3s;
+        }
+        
+        .dashboard-card:nth-child(4) {
+            animation: fadeIn 0.4s ease forwards 0.4s;
+        }
+        
+        /* Modal Styles */
+        .custom-modal {
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .modal-header {
+            background-color: var(--primary);
+            color: white;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+        }
+        
+        .btn-purple {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-purple:hover {
+            background-color: var(--primary-dark);
+            color: white;
+        }
+        
+        /* Responsive styles */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+                z-index: 1040;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .toggle-sidebar {
+                display: block;
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0,0,0,0.4);
+                z-index: 1030;
+                display: none;
+            }
+            
+            .overlay.active {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            <i class="fas fa-gem me-2"></i>
+            <h3>Dealer Panel</h3>
+        </div>
+        <ul class="sidebar-menu">
+            <li>
+                <a href="{% url 'dealer_dashboard' %}" class="active">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span>Orders</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <i class="fas fa-box"></i>
+                    <span>Products</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Analytics</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <i class="fas fa-user"></i>
+                    <span>Profile</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'logout' %}">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Mobile overlay -->
+    <div class="overlay"></div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Topbar -->
+        <div class="topbar">
+            <div class="d-flex align-items-center">
+                <button class="toggle-sidebar me-3">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h4 class="mb-0">Dashboard</h4>
+            </div>
+            <div class="user-info">
+                <div class="user-avatar">
+                    {{ request.user.first_name|first }}
+                </div>
+                <div>
+                    <p class="mb-0 fw-bold">Welcome, {{ request.user.first_name }}</p>
+                    <small class="text-muted">Dealer</small>
+                </div>
+                <a href="{% url 'logout' %}" class="btn btn-sm logout-btn">
+                    <i class="fas fa-sign-out-alt me-1"></i> Logout
+                </a>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content-wrapper">
+            <h1 class="page-title">Dealer Dashboard</h1>
+            
+            <!-- Dashboard Content -->
+            <div class="row">
+                <!-- Card 1 -->
+                <div class="col-md-6 col-lg-3">
+                    <div class="dashboard-card">
+                        <div class="card-icon">
+                            <i class="fas fa-shopping-bag"></i>
+                        </div>
+                        <div class="card-title">Total Orders</div>
+                        <div class="card-value">324</div>
+                        <div class="card-footer">
+                            <i class="fas fa-arrow-up text-success me-1"></i>
+                            <span>12% from last month</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Card 2 -->
+                <div class="col-md-6 col-lg-3">
+                    <div class="dashboard-card">
+                        <div class="card-icon">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <div class="card-title">Revenue</div>
+                        <div class="card-value">$42,580</div>
+                        <div class="card-footer">
+                            <i class="fas fa-arrow-up text-success me-1"></i>
+                            <span>8.5% from last month</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Card 3 -->
+                <div class="col-md-6 col-lg-3">
+                    <div class="dashboard-card">
+                        <div class="card-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="card-title">Customers</div>
+                        <div class="card-value">156</div>
+                        <div class="card-footer">
+                            <i class="fas fa-arrow-up text-success me-1"></i>
+                            <span>5% from last month</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Card 4 -->
+                <div class="col-md-6 col-lg-3">
+                    <div class="dashboard-card">
+                        <div class="card-icon">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="card-title">Rating</div>
+                        <div class="card-value">4.8/5</div>
+                        <div class="card-footer">
+                            <i class="fas fa-arrow-up text-success me-1"></i>
+                            <span>0.2 from last month</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Orders -->
+            <div class="dashboard-card recent-activity">
+                <h5 class="mb-4">Recent Orders</h5>
+                
+                <!-- Order 1 -->
+                <div class="activity-item">
+                    <div class="activity-icon">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div class="activity-details">
+                        <div class="activity-title">Order #45628</div>
+                        <div class="activity-time">Today, 2:35 PM</div>
+                    </div>
+                    <div class="activity-status status-completed">Completed</div>
+                </div>
+                
+                <!-- Order 2 -->
+                <div class="activity-item">
+                    <div class="activity-icon">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div class="activity-details">
+                        <div class="activity-title">Order #45627</div>
+                        <div class="activity-time">Today, 11:20 AM</div>
+                    </div>
+                    <div class="activity-status status-completed">Completed</div>
+                </div>
+                
+                <!-- Order 3 -->
+                <div class="activity-item">
+                    <div class="activity-icon">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div class="activity-details">
+                        <div class="activity-title">Order #45626</div>
+                        <div class="activity-time">Yesterday, 4:45 PM</div>
+                    </div>
+                    <div class="activity-status status-pending">Pending</div>
+                </div>
+                
+                <!-- Order 4 -->
+                <div class="activity-item">
+                    <div class="activity-icon">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div class="activity-details">
+                        <div class="activity-title">Order #45625</div>
+                        <div class="activity-time">Yesterday, 1:30 PM</div>
+                    </div>
+                    <div class="activity-status status-completed">Completed</div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <a href="#" class="btn btn-purple">View All Orders</a>
+                </div>
+            </div>
+            
+            {% block content %}
+            <!-- This is where page-specific content will be injected -->
+            {% endblock %}
+        </div>
+    </div>
+    
+
+    <!-- JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Toggle sidebar on mobile
+        document.querySelector('.toggle-sidebar').addEventListener('click', function() {
+            document.querySelector('.sidebar').classList.toggle('active');
+            document.querySelector('.overlay').classList.toggle('active');
+        });
+        
+        // Close sidebar when clicking on overlay
+        document.querySelector('.overlay').addEventListener('click', function() {
+            document.querySelector('.sidebar').classList.remove('active');
+            document.querySelector('.overlay').classList.remove('active');
+        });
+        
+        // Add active class to current menu item
+        const currentLocation = location.href;
+        const menuItems = document.querySelectorAll('.sidebar-menu a');
+        menuItems.forEach(item => {
+            if(item.href === currentLocation) {
+                item.classList.add('active');
+            }
+        });
+    </script>
+</body>
+</html>

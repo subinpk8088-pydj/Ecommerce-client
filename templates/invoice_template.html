@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div class="invoice-box" style="max-width: 700px; margin: auto; border: 1px solid #eee; padding: 30px; font-family: Arial, sans-serif;">
+    <h2 style="text-align: center; font-weight: bold;">Invoice</h2>
+    <hr>
+
+    <p><strong>Customer:</strong> {{ purchase.user.first_name }} {{ purchase.user.last_name }}</p>
+    <p><strong>Email:</strong> {{ purchase.user.email }}</p>
+    <p><strong>Address:</strong> {{ purchase.delivery_address }}</p>
+    <p><strong>Date:</strong> {{ purchase.date_bought|date:"Y-m-d H:i" }}</p>
+
+    <hr>
+    <h4>Product Details:</h4>
+    <p><strong>Product:</strong> {{ purchase.product.name }}</p>
+    <p><strong>Quantity:</strong> {{ purchase.quantity }}</p>
+    <p><strong>Price per unit:</strong> ₹{{ purchase.product.price }}</p>
+    <p><strong>Subtotal:</strong> ₹{{ purchase.get_total_price }}</p>
+    <p><strong>GST:</strong> ₹{{ purchase.get_total_gst }}</p>
+
+    <hr>
+    <h4 style="text-align: right;">Total Amount: ₹{{ purchase.get_total_price_with_gst }}</h4>
+</div>
+</body>
+</html>
+
+

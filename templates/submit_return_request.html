@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<!-- Google Font -->
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(to bottom right, #fdf9ff, #f3e5ff);
+    min-height: 100vh;
+  }
+
+  .form-wrapper {
+    background-color: #fff;
+    border-radius: 20px;
+    padding: 40px 30px;
+    box-shadow: 0 12px 30px rgba(124, 82, 149, 0.12);
+    max-width: 600px;
+    margin: 0 auto;
+    animation: fadeIn 0.8s ease;
+  }
+
+  h3 {
+    color: #7c5295;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  label {
+    font-weight: 600;
+    color: #7c5295;
+  }
+
+  .form-control {
+    border-radius: 12px;
+    border: 1px solid #d7c9e7;
+    padding: 10px 15px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .form-control:focus {
+    border-color: #7c5295;
+    box-shadow: 0 0 0 3px rgba(124, 82, 149, 0.15);
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #7c5295, #a178bc);
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    padding: 10px 20px;
+    transition: all 0.3s ease;
+  }
+
+  .btn-primary:hover {
+    background: linear-gradient(135deg, #6a4782, #9269ab);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(124, 82, 149, 0.25);
+  }
+
+  .alert {
+    border-radius: 10px;
+    margin-top: 20px;
+    animation: fadeIn 0.6s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 576px) {
+    .form-wrapper {
+      padding: 30px 20px;
+    }
+  }
+</style>
+
+<div class="container mt-5">
+  <div class="form-wrapper">
+    <h3>Submit a Return Request</h3>
+    <form method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label>Product Name</label>
+        <input type="text" name="product_name" class="form-control" value="{{ product.name }}" readonly>
+      </div>
+      <div class="mb-3">
+        <label>Reason</label>
+        <textarea name="reason" class="form-control" rows="3" required></textarea>
+      </div>
+      <div class="mb-3">
+        <label>Upload Proof Image</label>
+        <input type="file" name="proof_image" class="form-control" required>
+      </div>
+      <div class="text-center">
+        <button type="submit" class="btn btn-primary">Submit Request</button>
+      </div>
+    </form>
+
+    
+{% if messages %}
+  <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+    {% for message in messages %}
+      <div class="toast show custom-toast align-items-center text-white shadow fade-in-slide" role="alert">
+        <div class="d-flex">
+          <div class="toast-body">
+            <i class="bi bi-check-circle-fill me-2"></i> {{ message }}
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<style>
+    /* Toast Styling */
+.custom-toast {
+    background-color: #48c78e; /* Modern soft green */
+    border-left: 4px solid #e8dbf2;
+    border-radius: 0.75rem;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.95rem;
+    animation: slideInTopRight 0.7s ease forwards;
+}
+
+/* Slide-in Animation */
+@keyframes slideInTopRight {
+    0% {
+        opacity: 0;
+        transform: translate(30px, -20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(0, 0);
+    }
+}
+
+</style>
+  </div>
+</div>
+{% endblock %}

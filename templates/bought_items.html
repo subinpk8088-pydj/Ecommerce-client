@@ -1,0 +1,494 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<!-- Bootstrap, Font & Styling -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+{% if messages %}
+  <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+    {% for message in messages %}
+      <div class="toast show custom-toast align-items-center text-white shadow fade-in-slide" role="alert">
+        <div class="d-flex">
+          <div class="toast-body">
+            <i class="bi bi-check-circle-fill me-2"></i> {{ message }}
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<style>
+    /* Toast Styling */
+.custom-toast {
+    background-color: #48c78e; /* Modern soft green */
+    border-left: 4px solid #e8dbf2;
+    border-radius: 0.75rem;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.95rem;
+    animation: slideInTopRight 0.7s ease forwards;
+}
+
+/* Slide-in Animation */
+@keyframes slideInTopRight {
+    0% {
+        opacity: 0;
+        transform: translate(30px, -20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(0, 0);
+    }
+}
+
+</style>
+<style>
+  :root {
+    --primary: #7c5295;
+    --primary-light: #9d74b5;
+    --primary-dark: #5e3978;
+    --secondary: #f8f0ff;
+    --accent: #ff99c8;
+    --text: #4a4a4a;
+    --light: #f9f5ff;
+  }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background-color: var(--light);
+    color: var(--text);
+  }
+
+  .purchased-section {
+    margin-top: 3rem;
+    margin-bottom: 3rem;
+    animation: fadeInUp 0.7s ease-in-out;
+  }
+
+  .page-title {
+    font-weight: 800;
+    background: linear-gradient(45deg, var(--primary-dark), var(--primary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 2rem;
+    text-align: center;
+    position: relative;
+    display: inline-block;
+  }
+
+  .page-title::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 25%;
+    width: 50%;
+    height: 4px;
+    background: linear-gradient(to right, var(--primary-light), var(--accent));
+    border-radius: 2px;
+  }
+
+  .card {
+    border: none;
+    border-radius: 1rem;
+    box-shadow: 0 8px 24px rgba(124, 82, 149, 0.1);
+    transition: all 0.4s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 28px rgba(124, 82, 149, 0.2);
+  }
+
+  .card-img-top {
+    height: 220px;
+    object-fit: cover;
+    border-top-left-radius: 1rem;
+    border-top-right-radius: 1rem;
+  }
+
+  .card-title {
+    font-weight: 600;
+    color: var(--primary-dark);
+  }
+
+  .card-text {
+    font-size: 0.95rem;
+    color: var(--text);
+  }
+
+  .purchase-date {
+    font-size: 0.85rem;
+    color: #888;
+  }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .no-items {
+    text-align: center;
+    padding: 5rem 0;
+    color: var(--primary-light);
+    font-size: 1.3rem;
+  }
+
+  .rating-form select, .rating-form textarea {
+    font-size: 0.9rem;
+  }
+
+  .rated {
+    font-size: 0.9rem;
+    color: green;
+  }
+
+  .already-rated {
+    font-size: 0.9rem;
+    color: #5e3978;
+  }
+  
+  /* Pagination styling */
+  .pagination .page-link {
+    color: var(--primary);
+    border-color: var(--primary-light);
+    margin: 0 3px;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+
+  .pagination .page-link:hover {
+    background-color: var(--secondary);
+    color: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(124, 82, 149, 0.15);
+  }
+
+  .pagination .page-item.active .page-link {
+    background-color: var(--primary);
+    border-color: var(--primary);
+  }
+
+  .pagination .page-item.disabled .page-link {
+    color: #6c757d;
+    border-color: #dee2e6;
+  }
+</style>
+
+<div class="container purchased-section">
+  <div class="mb-4">
+    <a href="{% url 'view_products' %}" class="nav-link">
+      <i class="fas fa-arrow-left"></i> Back to Products
+    </a>
+  </div>
+
+  <h2 class="page-title">Purchased Items</h2>
+<div class="row">     
+  {% for item in purchases %}       
+    <div class="col-md-4 mt-4">         
+      <div class="card h-100">           
+        {% if item.product.image %}             
+          <img src="{{ item.product.image.url }}" class="card-img-top" alt="{{ item.product.name }}">           
+        {% else %}             
+          <img src="{% static 'images/no-image.png' %}" class="card-img-top" alt="No Image">           
+        {% endif %}           
+        <div class="card-body d-flex flex-column">             
+          <h5 class="card-title">{{ item.product.name }}</h5>             
+          <p class="card-text">Price: ₹{{ item.product.price }}</p>             
+          <p class="purchase-date">Purchased on: {{ item.date_bought|date:"M d, Y" }}</p>             
+          <p><strong>Status:</strong>                
+            {% if item.status == 'delivered' %}                 
+              <span class="badge bg-success">{{ item.status }}</span>               
+            {% else %}                 
+              <span class="badge bg-warning text-dark">{{ item.status }}</span>               
+            {% endif %}             
+          </p>              
+
+          <!-- Action Buttons Section -->
+          <div class="d-flex gap-2 mb-2">
+            <!-- <a href="{% url 'product_detail' item.product.id %}" class="btn btn-outline-secondary btn-sm">               
+              <i class="bi bi-box-seam me-1"></i> View Delivery             
+            </a>              -->
+            <!-- View Invoice Button -->             
+            <button type="button" class="btn btn-view-invoice animate__animated animate__fadeIn btn-sm" data-bs-toggle="modal" data-bs-target="#invoiceModal{{ item.id }}">               
+              <i class="bi bi-file-earmark-text me-1"></i> View Invoice             
+            </button>    
+          </div>
+          <a href="{% url 'submit_return_request' item.id %}" class="btn btn-success animate__animated animate__fadeIn btn-sm mb-2">   
+            <i class="bi bi-arrow-return-left me-1"></i> Return 
+          </a>
+
+          {% if not item.rating %}               
+            <form method="POST" action="{% url 'submit_rating' item.product.id %}" class="rating-form mt-3">                 
+              {% csrf_token %}                 
+              <div class="mb-2">                   
+                <label class="form-label d-block mb-1">Rate this product:</label>                   
+                <div class="star-rating">                     
+                  {% for i in "54321" %}                       
+                    <input type="radio" id="star{{ i }}-{{ item.product.id }}" name="rating" value="{{ i }}" required>                       
+                    <label for="star{{ i }}-{{ item.product.id }}" title="{{ i }} star{{ i|pluralize }}">                         
+                      &#9733;                       
+                    </label>                     
+                  {% endfor %}                   
+                </div>                 
+              </div>                  
+              <div class="mb-2">                   
+                <textarea name="review" class="form-control form-control-sm" rows="2" placeholder="Optional review..."></textarea>                 
+              </div>                  
+              <button type="submit" class="btn btn-sm btn-primary">Submit Rating</button>               
+            </form>             
+          {% else %}               
+            <p class="already-rated mt-2">                 
+              <i class="fas fa-star text-warning"></i> You rated: {{ item.rating.rating }} star{{ item.rating.rating|pluralize }}               
+            </p>               
+            {% if item.rating.review %}                 
+              <p class="text-muted small">"{{ item.rating.review }}"</p>               
+            {% endif %}             
+          {% endif %}           
+        </div>         
+      </div>       
+    </div>     
+  {% empty %}       
+    <div class="no-items">No items bought yet.</div>     
+  {% endfor %}   
+</div>
+  <!-- Pagination -->
+  {% if purchases.has_other_pages %}
+    <div class="pagination-container d-flex justify-content-center mt-5">
+      <nav aria-label="Page navigation">
+        <ul class="pagination">
+          {% if purchases.has_previous %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ purchases.previous_page_number }}" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+              </a>
+            </li>
+          {% else %}
+            <li class="page-item disabled">
+              <span class="page-link" aria-hidden="true">&laquo;</span>
+            </li>
+          {% endif %}
+          
+          {% for num in purchases.paginator.page_range %}
+            {% if purchases.number == num %}
+              <li class="page-item active">
+                <span class="page-link">{{ num }}</span>
+              </li>
+            {% else %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+              </li>
+            {% endif %}
+          {% endfor %}
+          
+          {% if purchases.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ purchases.next_page_number }}" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+              </a>
+            </li>
+          {% else %}
+            <li class="page-item disabled">
+              <span class="page-link" aria-hidden="true">&raquo;</span>
+            </li>
+          {% endif %}
+        </ul>
+      </nav>
+    </div>
+  {% endif %}
+</div>
+
+<!-- invoice modal starting -->
+{% for item in purchases %}
+<!-- Invoice Modal -->
+<div class="modal fade animate__animated animate__fadeIn" id="invoiceModal{{ item.id }}" tabindex="-1" aria-labelledby="invoiceModalLabel{{ item.id }}" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content rounded-4 shadow border-0">
+      <div class="modal-header border-0" style="background-color: #7c5295; color: white;">
+        <h5 class="modal-title fw-bold" id="invoiceModalLabel{{ item.id }}">
+          <i class="bi bi-receipt me-2"></i>Invoice: {{ item.product.name }}
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <div class="card shadow-sm rounded-4 mb-4 border-0 bg-light bg-opacity-50">
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <h6 class="fw-bold text-purple mb-3">Product Details</h6>
+                <p class="mb-2"><span class="text-muted">Product:</span> <span class="fw-semibold">{{ item.product.name }}</span></p>
+                <p class="mb-2"><span class="text-muted">Quantity:</span> <span class="fw-semibold">{{ item.quantity }}</span></p>
+                <p class="mb-2"><span class="text-muted">Base Price:</span> <span class="fw-semibold">₹{{ item.product.price }}</span></p>
+              </div>
+              <div class="col-md-6">
+                <h6 class="fw-bold text-purple mb-3">Payment Details</h6>
+                <p class="mb-2"><span class="text-muted">GST ({{ item.gst_percentage }}%):</span> <span class="fw-semibold">₹{{ item.gst_amount }}</span></p>
+                <p class="mb-2"><span class="text-muted">Payment Mode:</span> <span class="fw-semibold">{{ item.payment_mode }}</span></p>
+                <p class="mb-4"><span class="text-muted">Purchased On:</span> <span class="fw-semibold">{{ item.date_bought|date:"M d, Y H:i A" }}</span></p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card shadow-sm rounded-4 mb-4 border-0 bg-purple bg-opacity-10">
+          <div class="card-body">
+            <h6 class="fw-bold text-dark mb-3">Delivery Information</h6>
+            <p class="mb-2"><span class="text-muted">Delivery Address:</span> <span class="fw-semibold">{{ item.delivery_address }}</span></p>
+          </div>
+        </div>
+        
+        <div class="card shadow-sm rounded-4 border-0 bg-purple bg-opacity-25">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <h6 class="fw-bold text-dark mb-0">Total Amount</h6>
+              <span class="fs-4 fw-bold text-dark">₹{{ item.total_price_with_gst }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer border-0 justify-content-between">
+        <button type="button" class="btn btn-outline-secondary rounded-pill px-4 py-2 shadow-sm" data-bs-dismiss="modal">
+          <i class="bi bi-x me-1"></i> Close
+        </button>
+        <button type="button" class="btn btn-purple rounded-pill px-4 py-2 shadow-sm" onclick="window.print()">
+          <i class="bi bi-printer me-1"></i> Print Invoice
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}
+
+<!-- CSS to add to your stylesheet -->
+<style>
+/* Google Font Import */
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700&display=swap');
+@import url('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css');
+
+/* Custom Variables */
+:root {
+  --purple-primary: #7c5295;
+  --purple-light: #9a77ad;
+  --purple-lighter: #e2d8e8;
+  --purple-dark: #5a3b6d;
+}
+
+
+
+/* Color Classes */
+.text-purple {
+  color: var(--purple-primary);
+}
+
+.bg-purple {
+  background-color: var(--purple-primary);
+}
+
+/* Button Styles */
+.btn-purple {
+  background-color: var(--purple-primary);
+  color: white;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.btn-purple:hover {
+  background-color: var(--purple-dark);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(124, 82, 149, 0.3);
+}
+
+/* View Invoice Button */
+.btn-view-invoice {
+  background-color: var(--purple-primary);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+}
+
+.btn-view-invoice:hover {
+  background-color: var(--purple-dark);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(124, 82, 149, 0.3);
+}
+
+/* Card Hover Effects */
+.card {
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Modal Animation */
+.modal.fade .modal-dialog {
+  transition: transform 0.3s ease-out;
+  transform: scale(0.95);
+}
+
+.modal.show .modal-dialog {
+  transform: scale(1);
+}
+
+/* Print Styles */
+@media print {
+  .modal-footer, .btn-close {
+    display: none;
+  }
+  
+  .modal {
+    position: absolute;
+    left: 0;
+    top: 0;
+    margin: 0;
+    padding: 0;
+    overflow: visible !important;
+  }
+  
+  .modal-content {
+    box-shadow: none !important;
+  }
+}
+</style>
+
+<!-- invoice modal starting end-->
+
+<style>
+    .star-rating {
+  direction: rtl;
+  display: inline-flex;
+}
+
+.star-rating input[type="radio"] {
+  display: none;
+}
+
+.star-rating label {
+  font-size: 1.5rem;
+  color: #ddd;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.star-rating input[type="radio"]:checked ~ label,
+.star-rating label:hover,
+.star-rating label:hover ~ label {
+  color: #f5b301;
+}
+
+</style>
+{% endblock %}

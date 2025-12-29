@@ -1,0 +1,595 @@
+{% extends 'admin/base.html' %}
+
+{% block content %}
+
+{% if messages %}
+  <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+    {% for message in messages %}
+      <div class="toast show custom-toast align-items-center text-white shadow fade-in-slide" role="alert">
+        <div class="d-flex">
+          <div class="toast-body">
+            <i class="bi bi-check-circle-fill me-2"></i> {{ message }}
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<style>
+    /* Toast Styling */
+.custom-toast {
+    background-color: #48c78e; /* Modern soft green */
+    border-left: 4px solid #e8dbf2;
+    border-radius: 0.75rem;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.95rem;
+    animation: slideInTopRight 0.7s ease forwards;
+}
+
+/* Slide-in Animation */
+@keyframes slideInTopRight {
+    0% {
+        opacity: 0;
+        transform: translate(30px, -20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(0, 0);
+    }
+}
+
+</style>
+<div class="container category-management">
+  <!-- Page Header with Animation -->
+  <div class="page-header">
+    <h2 class="fade-in">Category Management</h2>
+    <p class="subtitle slide-in">Organize your product categories efficiently</p>
+  </div>
+
+  <div class="row">
+    <!-- Add Category Form in Card -->
+    <!-- Add Category Form in Card -->
+<div class="col-lg-4" style="margin-bottom: 1.5rem;">
+  <div class="card category-form-card slide-up">
+    <div class="card-header">
+      <h3>{% if category %}Edit Category{% else %}Add New Category{% endif %}</h3>
+    </div>
+    <div class="card-body">
+      <form method="POST" class="category-form">
+        {% csrf_token %}
+        <div class="form-floating mb-3">
+          <input type="text" class="form-control" id="name" name="name" value="{{ category.name|default:'' }}" required>
+          <label for="name">Category Name</label>
+        </div>
+
+        <div class="form-floating mb-3">
+          <textarea class="form-control" id="description" name="description" style="height: 120px">{{ category.description|default:'' }}</textarea>
+          <label for="description">Category Description</label>
+        </div>
+
+        <div class="d-grid">
+          <button type="submit" class="btn btn-primary btn-lg">
+            <i class="bi bi-plus-circle me-2"></i>{% if category %}Update Category{% else %}Add Category{% endif %}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+    
+    <!-- Category List Section -->
+    <div class="col-lg-8">
+      <div class="card category-list-card fade-in">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h3>Existing Categories</h3>
+          <div class="input-group" style="max-width: 250px;">
+            <input type="text" id="categorySearch" class="form-control" placeholder="Search categories...">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table category-table">
+              <thead>
+                <tr>
+                  <th>Category Name</th>
+                  <th>Description</th>
+                  <th class="text-end">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for category in categories %}
+                  <tr class="category-row">
+                    <td>
+                      <div class="category-name">
+                        <span class="category-icon"><i class="bi bi-folder2"></i></span>
+                        <span>{{ category.name }}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="category-description">
+                        {{ category.description|truncatechars:100 }}
+                      </div>
+                    </td>
+                    <td>
+                      <div class="action-buttons text-end">
+                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editCategoryModal" 
+                                data-category-id="{{ category.id }}" 
+                                data-category-name="{{ category.name }}" 
+                                data-category-description="{{ category.description }}">
+                          <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteCategoryModal"
+                                data-category-id="{{ category.id }}" 
+                                data-category-name="{{ category.name }}">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                {% empty %}
+                  <tr>
+                    <td colspan="3" class="text-center py-5">
+                      <div class="empty-state">
+                        <i class="bi bi-folder-x empty-icon"></i>
+                        <p>No categories available</p>
+                        <p class="text-muted">Add your first category using the form</p>
+                      </div>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <!-- Category Stats Footer (Optional) -->
+        <div class="card-footer bg-white">
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="category-stats">
+              <span class="badge bg-primary">{{ categories|length }} Categories</span>
+            </div>
+            <div class="text-muted small">
+              Categories help organize your products for better navigation
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Category Modal - Improved UI -->
+<div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editCategoryModalLabel">Edit Category</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form method="POST" class="edit-category-form">
+          {% csrf_token %}
+          <input type="hidden" name="category_id" id="category_id">
+          
+          <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="edit_name" name="name" required>
+            <label for="edit_name">Category Name</label>
+          </div>
+          
+          <div class="form-floating mb-3">
+            <textarea class="form-control" id="edit_description" name="description" style="height: 150px"></textarea>
+            <label for="edit_description">Category Description</label>
+          </div>
+          
+          <div class="d-flex justify-content-end">
+            <button type="button" class="btn btn-outline-secondary me-2" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-check-circle me-1"></i>Save Changes
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Category Confirmation Modal - Improved UI -->
+<div class="modal fade" id="deleteCategoryModal" tabindex="-1" aria-labelledby="deleteCategoryModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteCategoryModalLabel">Delete Category</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <div class="delete-warning-icon mb-3">
+          <i class="bi bi-exclamation-triangle-fill"></i>
+        </div>
+        <p class="delete-warning">Are you sure you want to delete the category "<strong id="deleteCategoryName"></strong>"?</p>
+        <div class="alert alert-warning mt-3">
+          <i class="bi bi-info-circle me-1"></i>
+          <small>Warning: Deleting a category might affect products assigned to it</small>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <form method="POST" action="{% url 'delete_category' 0 %}" id="delete-category-form">
+          {% csrf_token %}
+          <input type="hidden" id="category_id_to_delete" name="category_id">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger">
+            <i class="bi bi-trash me-1"></i>Delete
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add CSS styles specific to this page - Matching the product page style -->
+<style>
+  /* Color Palette for Feminine Hygiene & Baby Products */
+  :root {
+    --primary: #7c5295;  /* Soft purple - main brand color */
+    --primary-light: #a17eb6;
+    --secondary: #e882a6;  /* Soft pink - secondary brand color */
+    --secondary-light: #ffd3e2;
+    --accent: #5cc6d0;  /* Teal - accent color */
+    --neutral-light: #f4f6f9;
+    --neutral: #e9ecef;
+    --text-dark: #495057;
+    --text-light: #6c757d;
+    --success: #4caf93;
+    --warning: #ffb347;
+    --danger: #f67280;
+    --white: #ffffff;
+  }
+
+  /* Overall Page Styling */
+  body {
+    background-color: var(--neutral-light);
+    color: var(--text-dark);
+    font-family: 'Nunito', 'Segoe UI', sans-serif;
+  }
+  
+  .category-management {
+    padding: 2rem 0;
+  }
+  
+  /* Header Styling */
+  .page-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 3px solid var(--primary-light);
+  }
+  
+  .page-header h2 {
+    color: var(--primary);
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+  
+  .subtitle {
+    color: var(--text-light);
+    font-size: 1.1rem;
+  }
+  
+  /* Card Styling */
+  .card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+  }
+  
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  }
+  
+  .card-header {
+    background-color: var(--primary);
+    color: white;
+    border-bottom: none;
+    padding: 1.25rem 1.5rem;
+  }
+  
+  .card-body {
+    padding: 1.5rem;
+  }
+  
+  /* Form Styling */
+  .form-control, .form-select {
+    border-radius: 8px;
+    border: 1px solid var(--neutral);
+    padding: 0.75rem 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .form-control:focus, .form-select:focus {
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 0.25rem rgba(124, 82, 149, 0.25);
+  }
+  
+  .input-group-text {
+    background-color: var(--primary);
+    color: white;
+    border: none;
+  }
+  
+  /* Button Styling */
+  .btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    border-radius: 8px;
+    padding: 0.5rem 1.5rem;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-primary:hover, .btn-primary:focus {
+    background-color: var(--primary-light);
+    border-color: var(--primary-light);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(124, 82, 149, 0.3);
+  }
+  
+  .btn-outline-primary {
+    color: var(--primary);
+    border-color: var(--primary);
+  }
+  
+  .btn-outline-primary:hover {
+    background-color: var(--primary);
+    color: white;
+  }
+  
+  .btn-outline-danger {
+    color: var(--danger);
+    border-color: var(--danger);
+  }
+  
+  .btn-outline-danger:hover {
+    background-color: var(--danger);
+    color: white;
+  }
+  
+  /* Table Styling */
+  .category-table {
+    background-color: white;
+    margin-bottom: 0;
+  }
+  
+  .category-table thead {
+    background-color: var(--primary);
+    color: white;
+  }
+  
+  .category-table thead th {
+    padding: 1rem;
+    font-weight: 600;
+    border-bottom: none;
+  }
+  
+  .category-row {
+    transition: background-color 0.2s ease;
+  }
+  
+  .category-row:hover {
+    background-color: var(--neutral-light);
+  }
+  
+  .category-row td {
+    vertical-align: middle;
+    padding: 1rem;
+  }
+  
+  .category-name {
+    display: flex;
+    align-items: center;
+  }
+  
+  .category-icon {
+    display: inline-flex;
+    width: 32px;
+    height: 32px;
+    background-color: var(--primary-light);
+    color: white;
+    border-radius: 8px;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+  }
+  
+  .category-description {
+    color: var(--text-light);
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+  
+  .action-buttons .btn {
+    margin-left: 5px;
+  }
+  
+  /* Tips Card Styling */
+  .tips-card .card-header {
+    background-color: var(--accent);
+  }
+  
+  .tips-list {
+    padding-left: 1rem;
+    margin-bottom: 0;
+  }
+  
+  .tips-list li {
+    margin-bottom: 0.8rem;
+    line-height: 1.5;
+  }
+  
+  .tips-list li:last-child {
+    margin-bottom: 0;
+  }
+  
+  /* Empty state styling */
+  .empty-state {
+    padding: 2rem;
+    text-align: center;
+  }
+  
+  .empty-icon {
+    font-size: 3rem;
+    color: var(--text-light);
+    margin-bottom: 1rem;
+  }
+  
+  /* Modal Styling */
+  .modal-content {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  }
+  
+  .modal-header {
+    background-color: var(--primary);
+    color: white;
+    border-bottom: none;
+  }
+  
+  .modal-footer {
+    border-top: none;
+    padding: 1rem 2rem 2rem;
+  }
+  
+  /* Delete warning icon */
+  .delete-warning-icon {
+    font-size: 3rem;
+    color: var(--danger);
+  }
+  
+  .delete-warning {
+    font-size: 1.1rem;
+  }
+  
+  /* Card footer styling */
+  .card-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--neutral);
+  }
+  
+  /* Animations */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes slideIn {
+    from { transform: translateX(-20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  
+  .fade-in {
+    animation: fadeIn 0.8s ease forwards;
+  }
+  
+  .slide-in {
+    animation: slideIn 0.8s ease forwards;
+  }
+  
+  .slide-up {
+    animation: slideUp 0.8s ease forwards;
+  }
+</style>
+
+<!-- Add required Bootstrap Icons CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css">
+
+<!-- Add Custom Google Font -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Custom Scripts for Enhanced Functionality -->
+<script>
+  // Edit Category Modal Functionality
+  const editCategoryModal = document.getElementById('editCategoryModal');
+  if (editCategoryModal) {
+    editCategoryModal.addEventListener('show.bs.modal', function (event) {
+      const button = event.relatedTarget;
+      const categoryId = button.getAttribute('data-category-id');
+      const categoryName = button.getAttribute('data-category-name');
+      const categoryDescription = button.getAttribute('data-category-description');
+
+      const modalCategoryId = editCategoryModal.querySelector('#category_id');
+      const modalCategoryName = editCategoryModal.querySelector('#edit_name');
+      const modalCategoryDescription = editCategoryModal.querySelector('#edit_description');
+
+      modalCategoryId.value = categoryId;
+      modalCategoryName.value = categoryName;
+      modalCategoryDescription.value = categoryDescription;
+      
+      // Add animation to the modal
+      setTimeout(() => {
+        modalCategoryName.classList.add('is-focused');
+      }, 300);
+    });
+  }
+
+  // Delete Category Modal Functionality
+  const deleteCategoryModal = document.getElementById('deleteCategoryModal');
+  if (deleteCategoryModal) {
+    deleteCategoryModal.addEventListener('show.bs.modal', function (event) {
+      const button = event.relatedTarget;
+      const categoryId = button.getAttribute('data-category-id');
+      const categoryName = button.getAttribute('data-category-name');
+
+      const modalCategoryName = deleteCategoryModal.querySelector('#deleteCategoryName');
+      const modalCategoryId = deleteCategoryModal.querySelector('#category_id_to_delete');
+
+      modalCategoryName.textContent = categoryName;
+      modalCategoryId.value = categoryId;
+      
+      // Update the form action to use the correct category ID
+      const form = document.getElementById('delete-category-form');
+      form.action = form.action.replace('/0/', '/' + categoryId + '/');
+    });
+  }
+
+  // Search functionality for category table
+  document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('categorySearch');
+    if (searchInput) {
+      searchInput.addEventListener('keyup', function() {
+        const searchTerm = this.value.toLowerCase();
+        const rows = document.querySelectorAll('.category-row');
+        
+        rows.forEach(row => {
+          const categoryName = row.querySelector('.category-name span:last-child').textContent.toLowerCase();
+          const categoryDesc = row.querySelector('.category-description').textContent.toLowerCase();
+          
+          if (categoryName.includes(searchTerm) || categoryDesc.includes(searchTerm)) {
+            row.style.display = '';
+          } else {
+            row.style.display = 'none';
+          }
+        });
+      });
+    }
+    
+    // Add animation to category rows
+    const categoryRows = document.querySelectorAll('.category-row');
+    categoryRows.forEach((row, index) => {
+      row.style.opacity = '0';
+      row.style.animation = `fadeIn 0.5s ease forwards ${0.1 + index * 0.05}s`;
+    });
+  });
+</script>
+{% endblock %}

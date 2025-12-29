@@ -1,0 +1,114 @@
+{% extends 'admin/base.html' %}
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+    body {
+        font-family: 'Nunito', sans-serif;
+        background-color: #f4f1f7;
+    }
+
+    h2 {
+        color: #7c5295;
+        font-weight: 700;
+        margin-bottom: 30px;
+    }
+
+    .table {
+        background-color: #fff;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(124, 82, 149, 0.1);
+    }
+
+    .table th {
+        background-color: #7c5295;
+        color: #fff;
+        font-weight: 600;
+    }
+
+    .table td, .table th {
+        vertical-align: middle;
+        text-align: center;
+    }
+
+    .badge {
+        font-size: 0.85rem;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    .badge-out-for-delivery { background-color: #ffb84d; color: #5a3e00; }
+    .badge-delivered { background-color: #6bcf9e; color: #003b2e; }
+    .badge-assigned-to-agent { background-color: #007bff; color: #fff; }
+    .badge-pending { background-color: #ffc107; color: #212529; }
+    .badge-processing { background-color: #17a2b8; color: #fff; }
+
+    .fade-in {
+        animation: fadeIn 0.8s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .alert-warning {
+        background-color: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeeba;
+    }
+</style>
+
+<div class="container mt-4 fade-in">
+    <h2>📦 All Assigned Orders (Admin View)</h2>
+    {% if assigned_orders %}
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Order ID</th>
+                    <th>Product</th>
+                    <th>Customer</th>
+                    <th>Status</th>
+                    <th>Delivery Date</th>
+                    <th>Location</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in assigned_orders %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ order.id }}</td>
+                    <td>{{ order.product.name }}</td>
+                    <td>{{ order.user.first_name }} {{ order.user.last_name }}</td>
+                    <td>
+                        {% if order.status == 'out_for_delivery' %}
+                            <span class="badge badge-out-for-delivery">Out for Delivery</span>
+                        {% elif order.status == 'delivered' %}
+                            <span class="badge badge-delivered">Delivered</span>
+                        {% elif order.status == 'assigned_to_agent' %}
+                            <span class="badge badge-assigned-to-agent">Assigned to Agent</span>
+                        {% elif order.status == 'pending' %}
+                            <span class="badge badge-pending">Pending</span>
+                        {% elif order.status == 'processing' %}
+                            <span class="badge badge-processing">Processing</span>
+                        {% else %}
+                            <span class="badge badge-secondary">{{ order.status|capfirst }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ order.delivery_date|default:"-" }}</td>
+                    <td>{{ order.current_location|default:"-" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-warning text-center">🚫 No assigned orders found.</div>
+    {% endif %}
+</div>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+{% endblock %}

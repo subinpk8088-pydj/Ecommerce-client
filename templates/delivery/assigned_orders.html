@@ -1,0 +1,219 @@
+{% extends 'delivery/delivery_base_dashboard.html' %}
+
+{% block content %}
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+
+<!-- Required JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
+
+<!-- Custom Styles -->
+<style>
+    body {
+        font-family: 'Nunito', sans-serif;
+        background-color: #f4f1f7;
+    }
+
+    h2 {
+        color: #7c5295;
+        font-weight: 700;
+        margin-bottom: 30px;
+    }
+
+    .table {
+        background-color: #fff;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(124, 82, 149, 0.1);
+    }
+
+    .table th {
+        background-color: #7c5295;
+        color: #fff;
+        font-weight: 600;
+    }
+
+    .table td, .table th {
+        vertical-align: middle;
+        text-align: center;
+    }
+
+    .badge {
+        font-size: 0.85rem;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    /* Custom badge styles - these will override Bootstrap defaults */
+    .badge-out-for-delivery {
+        background-color: #ffb84d !important;
+        color: #5a3e00 !important;
+    }
+
+    .badge-delivered {
+        background-color: #6bcf9e !important;
+        color: #003b2e !important;
+    }
+
+    .badge-assigned-to-agent {
+        background-color: #007bff !important;
+        color: #fff !important;
+    }
+
+    .badge-pending {
+        background-color: #ffc107 !important;
+        color: #212529 !important;
+    }
+
+    .badge-processing {
+        background-color: #17a2b8 !important;
+        color: #fff !important;
+    }
+
+    .btn-primary {
+        background-color: #7c5295;
+        border-color: #7c5295;
+    }
+
+    .btn-primary:hover {
+        background-color: #68437b;
+        border-color: #68437b;
+    }
+
+    .modal-content {
+        border-radius: 16px;
+    }
+
+    .modal-header {
+        background-color: #ede2f5;
+        color: #7c5295;
+        font-weight: 600;
+        border-top-left-radius: 16px;
+        border-top-right-radius: 16px;
+    }
+
+    .form-control:focus {
+        border-color: #7c5295;
+        box-shadow: 0 0 0 0.2rem rgba(124, 82, 149, 0.25);
+    }
+
+    .fade-in {
+        animation: fadeIn 0.8s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .btn-sm i {
+        margin-right: 4px;
+    }
+
+    .alert-warning {
+        background-color: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeeba;
+    }
+
+</style>
+
+<div class="container mt-4 fade-in">
+    <h2>📦 My Assigned Orders</h2>
+
+    {% if assigned_orders %}
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Order ID</th>
+                    <th>Product</th>
+                    <th>Customer</th>
+                    <th>Status</th>
+                    <th>Delivery Date</th>
+                    <th>Location</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in assigned_orders %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ order.id }}</td>
+                    <td>{{ order.product.name }}</td>
+                    <td>{{ order.user.first_name }} {{ order.user.last_name }}</td>
+                    <td>
+                        {% if order.status == 'out_for_delivery' %}
+                            <span class="badge badge-out-for-delivery">Out for Delivery</span>
+                        {% elif order.status == 'delivered' %}
+                            <span class="badge badge-delivered">Delivered</span>
+                        {% elif order.status == 'assigned_to_agent' %}
+                            <span class="badge badge-assigned-to-agent">Assigned to Agent</span>
+                        {% elif order.status == 'pending' %}
+                            <span class="badge badge-pending">Pending</span>
+                        {% elif order.status == 'processing' %}
+                            <span class="badge badge-processing">Processing</span>
+                        {% else %}
+                            <span class="badge badge-secondary">{{ order.status|capfirst }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ order.delivery_date|default:"-" }}</td>
+                    <td>{{ order.current_location|default:"-" }}</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#updateModal{{ order.id }}">
+                            <i class="fas fa-edit"></i> Update
+                        </button>
+
+                        <!-- Update Modal -->
+                        <div class="modal fade" id="updateModal{{ order.id }}" tabindex="-1" role="dialog">
+                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                <div class="modal-content">
+                                    <form method="POST" action="{% url 'update_delivery_info' order.id %}">
+                                        {% csrf_token %}
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Update Delivery Info</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="form-group">
+                                                <label>Status</label>
+                                                <select name="status" class="form-control" required>
+                                                    <option value="assigned_to_agent" {% if order.status == "assigned_to_agent" %}selected{% endif %}>Assigned to Agent</option>
+                                                    <option value="out_for_delivery" {% if order.status == "out_for_delivery" %}selected{% endif %}>Out for Delivery</option>
+                                                    <option value="delivered" {% if order.status == "delivered" %}selected{% endif %}>Delivered</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Current Location</label>
+                                                <input type="text" name="current_location" class="form-control" value="{{ order.current_location }}">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Delivery Date</label>
+                                                <input type="date" name="delivery_date" class="form-control" value="{{ order.delivery_date|date:'Y-m-d' }}">
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                            <button type="submit" class="btn btn-success">Save</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-warning text-center">🚫 No orders assigned to you yet.</div>
+    {% endif %}
+</div>
+{% endblock %}

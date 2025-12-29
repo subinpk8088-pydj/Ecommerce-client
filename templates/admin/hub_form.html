@@ -1,0 +1,36 @@
+{% extends 'admin/base.html' %} 
+{% load static %}  
+{% block content %}
+
+<form id="hubForm" method="post">
+  {% csrf_token %}
+  <input type="text" name="name" class="form-control" placeholder="HUB Name" required>
+  <input type="text" name="address" class="form-control" placeholder="Address" required>
+  <input type="email" name="email" class="form-control" placeholder="Email" required>
+  <input type="tel" name="phone" class="form-control" placeholder="Phone" required>
+  <input type="text" name="pin_code" class="form-control" placeholder="Pin-code" required>
+  <input type="text" name="district" class="form-control" placeholder="District" required>
+  <input type="text" name="state" class="form-control" placeholder="State" required>
+  <input type="text" name="city" class="form-control" placeholder="City" required>
+  <button type="submit" class="btn btn-primary">Add HUB</button>
+</form>
+
+<script>
+document.getElementById("hubForm").addEventListener("submit", function(e){
+    e.preventDefault();
+    const formData = new FormData(this);
+    fetch("{% url 'add_hub' %}", {
+        method: 'POST',
+        headers: {'X-CSRFToken': '{{ csrf_token }}'},
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert(data.message);
+    });
+});
+</script>
+
+
+
+{% endblock %}

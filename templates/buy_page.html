@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+
+{% block title %}Purchase {{ product.name }} - Store{% endblock %}
+
+{% block content %}
+<!-- Bootstrap 5 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+<!-- Font Awesome for Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+{% if messages %}
+  <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+    {% for message in messages %}
+      <div class="toast show custom-toast align-items-center text-white shadow fade-in-slide" role="alert">
+        <div class="d-flex">
+          <div class="toast-body">
+            <i class="bi bi-check-circle-fill me-2"></i> {{ message }}
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<style>
+    /* Toast Styling */
+.custom-toast {
+    background-color: #48c78e; /* Modern soft green */
+    border-left: 4px solid #e8dbf2;
+    border-radius: 0.75rem;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.95rem;
+    animation: slideInTopRight 0.7s ease forwards;
+}
+
+/* Slide-in Animation */
+@keyframes slideInTopRight {
+    0% {
+        opacity: 0;
+        transform: translate(30px, -20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(0, 0);
+    }
+}
+
+</style>
+<!-- Custom Styles -->
+<style>
+  body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f4f7f6;
+    color: #333;
+  }
+  h2, h3 {
+    color: #2c3e50;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+  .buy-container {
+    background-color: #ffffff;
+    border-radius: 1rem;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+    overflow: hidden;
+  }
+  .product-image {
+    height: 300px;
+    object-fit: cover;
+    border-radius: 0.5rem;
+  }
+  .product-details {
+    padding: 1.5rem;
+  }
+  .price-tag {
+    color: #27ae60;
+    font-weight: 600;
+    font-size: 1.4rem;
+  }
+  .form-control, .form-select {
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+    border: 1px solid #e0e0e0;
+  }
+  .btn-purchase {
+    background-color: #3498db;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+  }
+  .btn-purchase:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  }
+  .btn-back {
+    color: #7f8c8d;
+    transition: all 0.3s ease;
+  }
+  .btn-back:hover {
+    color: #2c3e50;
+    transform: translateY(-2px);
+  }
+  .stock-badge {
+    background-color: #3498db;
+    padding: 0.4rem 0.75rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+  }
+  .category-badge {
+    background-color: #f1c40f;
+    color: #34495e;
+    padding: 0.4rem 0.75rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+  }
+</style>
+
+<div class="container">
+  <!-- Back Button -->
+  <div class="mt-4">
+    <a href="{% url 'view_products' %}" class="btn btn-back">
+      <i class="fas fa-arrow-left me-2"></i> Back to Products
+    </a>
+  </div>
+
+  <div class="buy-container">
+    <div class="row g-0">
+      <!-- Product Image and Details -->
+      <div class="col-md-5">
+        {% if product.image %}
+          <img src="{{ product.image.url }}" class="img-fluid product-image" alt="{{ product.name }}">
+        {% else %}
+          <img src="https://via.placeholder.com/500x400?text=No+Image" class="img-fluid product-image" alt="No Image">
+        {% endif %}
+      </div>
+      <div class="col-md-7">
+        <div class="product-details">
+          <h2 class="mb-3">{{ product.name }}</h2>
+          
+          <div class="d-flex mb-3">
+            <span class="badge stock-badge me-2">Stock: {{ product.quantity }}</span>
+            <span class="badge category-badge">{{ product.category.name }}</span>
+          </div>
+          
+          <p class="text-muted mb-3">{{ product.description }}</p>
+          <p class="price-tag mb-4">₹{{ product.price }}</p>
+          
+          <h3 class="mb-3">Complete Your Purchase</h3>
+          
+          <form method="post" action="{% url 'buy_now' product.id %}">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Delivery Address</label>
+              <textarea class="form-control" name="address" rows="3" required placeholder="Enter your complete delivery address"></textarea>
+            </div>
+            
+            <div class="mb-4">
+              <label class="form-label fw-semibold">Payment Mode</label>
+              <select class="form-select" name="payment_mode" required>
+                <option value="" selected disabled>Select payment method</option>
+                <option value="cod">Cash on Delivery</option>
+                <option value="upi">UPI</option>
+                <option value="card">Credit/Debit Card</option>
+              </select>
+            </div>
+            
+            <div class="d-grid">
+              <button type="submit" class="btn btn-purchase btn-lg">Confirm Purchase</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap 5 JS Bundle (includes Popper) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-8z+Hc07FHVZ6XaZ5uZc9oxJ7bFnYiKUG1Qw5SNXnoUUMaR7A1R9q6Ht/PrGPej6kz" crossorigin="anonymous"></script>
+{% endblock %}

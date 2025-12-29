@@ -1,0 +1,962 @@
+{% extends 'admin/base.html' %}
+
+{% block content %}
+{% if messages %}
+  <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+    {% for message in messages %}
+      <div class="toast show custom-toast align-items-center text-white shadow fade-in-slide" role="alert">
+        <div class="d-flex">
+          <div class="toast-body">
+            <i class="bi bi-check-circle-fill me-2"></i> {{ message }}
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<style>
+    /* Toast Styling */
+.custom-toast {
+    background-color: #48c78e; /* Modern soft green */
+    border-left: 4px solid #e8dbf2;
+    border-radius: 0.75rem;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.95rem;
+    animation: slideInTopRight 0.7s ease forwards;
+}
+
+/* Slide-in Animation */
+@keyframes slideInTopRight {
+    0% {
+        opacity: 0;
+        transform: translate(30px, -20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(0, 0);
+    }
+}
+
+</style>
+<div class="container product-management">
+  <!-- Page Header with Animation -->
+  <div class="page-header">
+    <h2 class="fade-in">Product Management</h2>
+    <p class="subtitle slide-in">Manage your products efficiently</p>
+  </div>
+
+  <!-- Card-based UI for the Form -->
+  <div class="card product-form-card slide-up">
+    <div class="card-header">
+      <h3>{% if product %}Edit Product{% else %}Add New Product{% endif %}</h3>
+    </div>
+    <div class="card-body">
+      <form method="POST" enctype="multipart/form-data" class="product-form">
+  {% csrf_token %}
+  {% if product %}
+    <input type="hidden" name="product_id" value="{{ product.id }}">
+  {% endif %}
+  <div class="row">
+    <div class="col-md-6">
+      <div class="form-floating mb-3">
+        <input type="text" class="form-control" id="name" name="name" value="{{ product.name|default:'' }}" required>
+        <label for="name">Product Name</label>
+      </div>
+
+      <div class="form-floating mb-3">
+        <select class="form-select" id="category" name="category" required>
+          <option value="">Select Category</option>
+          {% for category in categories %}
+            <option value="{{ category.id }}" {% if product and product.category.id == category.id %}selected{% endif %}>{{ category.name }}</option>
+          {% endfor %}
+        </select>
+        <label for="category">Category</label>
+      </div>
+
+      <div class="form-floating mb-3">
+        <input type="number" class="form-control" id="price" name="price" value="{{ product.price|default:'' }}" step="0.01" required>
+        <label for="price">Price</label>
+      </div>
+
+     <div class="form-floating mb-3">
+        <select class="form-select" id="is_taxable" name="is_taxable" onchange="toggleGstField()">
+          <option value="False" {% if product and not product.is_taxable %}selected{% endif %}>Non-Taxable</option>
+          <option value="True" {% if product and product.is_taxable %}selected{% endif %}>Taxable</option>
+        </select>
+        <label for="is_taxable">Tax Status</label>
+      </div>
+
+      <div class="form-floating mb-3" id="gst-field" style="display: {% if product and product.is_taxable %}block{% else %}none{% endif %};">
+        <select class="form-select" id="gst_percentage" name="gst_percentage">
+          <option value="">Select GST Percentage</option>
+          {% for gst in gst_options %}
+            <option value="{{ gst }}" {% if product and product.gst_percentage|stringformat:"g" == gst|stringformat:"g" %}selected{% endif %}>{{ gst }}%</option>
+          {% endfor %}
+        </select>
+        <label for="gst_percentage">GST Percentage (%)</label>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="form-floating mb-3">
+        <textarea class="form-control" id="description" name="description" style="height: 100px">{{ product.description|default:'' }}</textarea>
+        <label for="description">Description</label>
+      </div>
+       
+      <div class="form-floating mb-3">
+  <input type="text" class="form-control" id="brand" name="brand" value="{{ product.brand|default:'' }}">
+  <label for="brand">Brand</label>
+</div>
+
+<div class="form-floating mb-3">
+  <select name="size" class="form-control">
+  <option value="">Select Size</option>
+  {% for value, label in size_options %}
+    <option value="{{ value }}" {% if product and product.size == value %}selected{% endif %}>
+      {{ label }}
+    </option>
+  {% endfor %}
+</select>
+
+  <label for="size">Size</label>
+</div>
+
+      <div class="form-floating mb-3">
+        <input type="number" class="form-control" id="quantity" name="quantity" value="{{ product.quantity|default:0 }}" min="0" required>
+        <label for="quantity">Quantity</label>
+      </div>
+    </div>
+       
+    <div class="col-12">
+      <div class="mb-3">
+        <label for="image" class="form-label">Product Image</label>
+        <div class="input-group">
+          <input type="file" class="form-control" id="image" name="image" {% if not product %}required{% endif %}>
+          <label class="input-group-text" for="image"><i class="bi bi-upload"></i></label>
+        </div>
+        {% if product and product.image %}
+          <div class="image-preview mt-2 fade-in">
+            <img src="{{ product.image.url }}" alt="Product Image" class="img-thumbnail" style="max-width: 200px;">
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+    <button type="submit" class="btn btn-primary btn-lg">
+      <i class="bi bi-save"></i> {% if product %}Update Product{% else %}Add Product{% endif %}
+    </button>
+  </div>
+</form>
+
+
+
+    </div>
+  </div>
+
+
+<!-- Product List Section with Mobile Responsive Fixes -->
+<div class="product-list-section mt-5 fade-in">
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3">
+    <h3>Product Inventory</h3>
+    <div class="input-group mt-2 mt-md-0" style="max-width: 300px;">
+      <input type="text" id="productSearch" class="form-control" placeholder="Search products...">
+      <span class="input-group-text"><i class="bi bi-search"></i></span>
+    </div>
+  </div>
+  
+  <div class="table-responsive">
+  <table class="table table-hover product-table align-middle">
+  <thead class="table-light">
+    <tr>
+      <th>Product</th>
+      <th>Category</th>
+      <th>Price</th>
+      <th>GST (%)</th>
+      <th>Quantity</th>
+      <th>Brand</th>
+      <th>Size</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for product in products %}
+      <tr class="product-row">
+        <td>
+          <div class="d-flex align-items-center">
+            {% if product.image %}
+              <img src="{{ product.image.url }}" alt="{{ product.name }}" class="img-thumbnail me-2" 
+                   style="width: 50px; height: 50px; object-fit: cover;">
+            {% else %}
+              <div class="me-2 d-flex align-items-center justify-content-center" 
+                   style="width: 50px; height: 50px; background-color: #f0f0f0; border-radius: 4px;">
+                <i class="bi bi-box-seam fs-4 text-muted"></i>
+              </div>
+            {% endif %}
+            <div>
+              <strong>{{ product.name }}</strong><br>
+              <small class="text-muted d-block text-truncate" style="max-width: 180px;">
+                {{ product.description|truncatechars:50 }}
+              </small>
+            </div>
+          </div>
+        </td>
+
+        <td><span class="badge bg-info">{{ product.category.name }}</span></td>
+
+        <td>${{ product.price }}</td>
+
+        <td>
+          {% if product.is_taxable and product.gst_percentage %}
+            <span class="badge bg-success">{{ product.gst_percentage }}%</span>
+          {% else %}
+            <span class="badge bg-secondary">N/A</span>
+          {% endif %}
+        </td>
+
+        <td>
+          <span class="badge 
+            {% if product.quantity < 10 %}bg-danger
+            {% elif product.quantity < 30 %}bg-warning
+            {% else %}bg-success{% endif %}">
+            {{ product.quantity }}
+          </span>
+        </td>
+
+        <td>{{ product.brand|default:"-" }}</td>
+        <td>{{ product.size|default:"-" }}</td>
+
+        <td>
+          <div class="btn-group" role="group">
+            <!-- Edit Button -->
+            <button class="btn btn-sm btn-outline-primary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#editProductModal"
+                    data-product-id="{{ product.id }}"
+                    data-product-name="{{ product.name }}"
+                    data-product-category="{{ product.category.id }}"
+                    data-product-price="{{ product.price }}"
+                    data-product-description="{{ product.description }}"
+                    data-product-quantity="{{ product.quantity }}"
+                    data-product-gst="{{ product.gst_percentage|default:'' }}"
+                    data-product-taxable="{{ product.is_taxable|yesno:'True,False' }}"
+                    data-product-size="{{ product.size }}"
+                    data-product-brand="{{ product.brand }}"
+                    data-product-image="{% if product.image %}{{ product.image.url }}{% endif %}"
+                    title="Edit Product">
+              <i class="bi bi-pencil"></i>
+            </button>
+
+            <!-- Delete Button -->
+            <button class="btn btn-sm btn-outline-danger"
+                    data-bs-toggle="modal"
+                    data-bs-target="#deleteProductModal"
+                    data-product-id="{{ product.id }}"
+                    data-product-name="{{ product.name }}"
+                    title="Delete Product">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+        </td>
+      </tr>
+    {% empty %}
+      <tr>
+        <td colspan="8" class="text-center py-5">
+          <div class="empty-state">
+            <i class="bi bi-inbox-fill fs-1 text-muted"></i>
+            <p class="fw-bold mb-1">No products available</p>
+            <p class="text-muted">Add your first product using the form above</p>
+          </div>
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+
+  </div>
+</div>
+<!-- Edit Product Modal - Improved UI --> 
+<div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editProductModalLabel">Edit Product</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form method="POST" enctype="multipart/form-data" class="edit-product-form">
+          {% csrf_token %}
+          <input type="hidden" name="product_id" id="product_id">
+          
+          <div class="row">
+            <div class="col-md-8">
+              <div class="form-floating mb-3">
+                <input type="text" class="form-control" id="edit_name" name="name" required>
+                <label for="edit_name">Product Name</label>
+              </div>
+              
+              <div class="form-floating mb-3">
+                <select class="form-select" id="edit_category" name="category" required>
+                  {% for category in categories %}
+                    <option value="{{ category.id }}">{{ category.name }}</option>
+                  {% endfor %}
+                </select>
+                <label for="edit_category">Category</label>
+              </div>
+              
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-floating mb-3">
+                    <input type="number" class="form-control" id="edit_price" name="price" step="0.01" required>
+                    <label for="edit_price">Price</label>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-floating mb-3">
+                    <input type="number" class="form-control" id="edit_quantity" name="quantity" min="0" required>
+                    <label for="edit_quantity">Quantity</label>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Tax Status Dropdown -->
+              <div class="form-floating mb-3">
+                <select class="form-select" id="edit_is_taxable" name="is_taxable" onchange="toggleEditGstField()">
+                  <option value="False">Non-Taxable</option>
+                  <option value="True">Taxable</option>
+                </select>
+                <label for="edit_is_taxable">Tax Status</label>
+              </div>
+              
+              <!-- GST Percentage -->
+              <div class="form-floating mb-3" id="edit_gst_percentage_container" style="display: none;">
+                <select class="form-select" id="edit_gst_percentage" name="gst_percentage">
+                  <option value="">Select GST Percentage</option>
+                  {% for gst in gst_options %}
+                    <option value="{{ gst }}">{{ gst }}%</option>
+                  {% endfor %}
+                </select>
+                <label for="edit_gst_percentage">GST Percentage</label>
+              </div>
+              <!-- Brand -->
+<div class="form-floating mb-3">
+  <input type="text" class="form-control" id="edit_brand" name="brand" placeholder="Brand">
+  <label for="edit_brand">Brand</label>
+</div>
+
+<!-- Size -->
+<div class="form-floating mb-3">
+  <select class="form-select" id="edit_size" name="size" aria-label="Size select">
+    <option value="">Select Size</option>
+    {% for value, label in size_options %}
+      <option value="{{ value }}">{{ label }}</option>
+    {% endfor %}
+  </select>
+  <label for="edit_size">Size</label>
+</div>
+
+
+              <div class="form-floating mb-3">
+                <textarea class="form-control" id="edit_description" name="description" style="height: 100px"></textarea>
+                <label for="edit_description">Description</label>
+              </div>
+            </div>
+            
+            <div class="col-md-4">
+              <div class="mb-3">
+                <label for="edit_image" class="form-label">Product Image</label>
+                <input type="file" class="form-control" id="edit_image" name="image">
+                <div id="edit_image_preview" class="mt-2 text-center"></div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="d-flex justify-content-end">
+            <button type="button" class="btn btn-outline-secondary me-2" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Product Confirmation Modal - Improved UI -->
+<div class="modal fade" id="deleteProductModal" tabindex="-1" aria-labelledby="deleteProductModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteProductModalLabel">Confirm Deletion</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center">
+        <div class="delete-warning-icon mb-3">
+          <i class="bi bi-exclamation-triangle-fill"></i>
+        </div>
+        <p>Are you sure you want to delete the product "<strong><span id="product-name"></span></strong>"?</p>
+        <p class="text-muted small">This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <form id="delete-product-form" method="post">
+          {% csrf_token %}
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add CSS styles specific to this page -->
+<style>
+  /* Color Palette for Feminine Hygiene & Baby Products */
+  :root {
+    --primary: #7c5295;  /* Soft purple - main brand color */
+    --primary-light: #a17eb6;
+    --secondary: #e882a6;  /* Soft pink - secondary brand color */
+    --secondary-light: #ffd3e2;
+    --accent: #5cc6d0;  /* Teal - accent color */
+    --neutral-light: #f4f6f9;
+    --neutral: #e9ecef;
+    --text-dark: #495057;
+    --text-light: #6c757d;
+    --success: #4caf93;
+    --warning: #ffb347;
+    --danger: #f67280;
+    --white: #ffffff;
+  }
+
+  /* Overall Page Styling */
+  body {
+    background-color: var(--neutral-light);
+    color: var(--text-dark);
+    font-family: 'Nunito', 'Segoe UI', sans-serif;
+  }
+  
+  .product-management {
+    padding: 2rem 0;
+  }
+  
+  /* Header Styling */
+  .page-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 3px solid var(--primary-light);
+  }
+  
+  .page-header h2 {
+    color: var(--primary);
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+  
+  .subtitle {
+    color: var(--text-light);
+    font-size: 1.1rem;
+  }
+  
+  /* Card Styling */
+  .card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  }
+  
+  .card-header {
+    background-color: var(--primary);
+    color: white;
+    border-bottom: none;
+    padding: 1.25rem 1.5rem;
+  }
+  
+  .card-body {
+    padding: 2rem;
+  }
+  
+  /* Form Styling */
+  .form-control, .form-select {
+    border-radius: 8px;
+    border: 1px solid var(--neutral);
+    padding: 0.75rem 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .form-control:focus, .form-select:focus {
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 0.25rem rgba(124, 82, 149, 0.25);
+  }
+  
+  .input-group-text {
+    background-color: var(--primary);
+    color: white;
+    border: none;
+  }
+  
+  /* Button Styling */
+  .btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    border-radius: 8px;
+    padding: 0.5rem 1.5rem;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-primary:hover, .btn-primary:focus {
+    background-color: var(--primary-light);
+    border-color: var(--primary-light);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(124, 82, 149, 0.3);
+  }
+  
+  .btn-outline-primary {
+    color: var(--primary);
+    border-color: var(--primary);
+  }
+  
+  .btn-outline-primary:hover {
+    background-color: var(--primary);
+    color: white;
+  }
+  
+  .btn-outline-danger {
+    color: var(--danger);
+    border-color: var(--danger);
+  }
+  
+  .btn-outline-danger:hover {
+    background-color: var(--danger);
+    color: white;
+  }
+  
+  /* Table Styling */
+  .product-table {
+    background-color: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  }
+  
+  .product-table thead {
+    background-color: var(--primary);
+    color: white;
+  }
+  
+  .product-table thead th {
+    padding: 1rem;
+    font-weight: 600;
+    border-bottom: none;
+  }
+  
+  .product-row {
+    transition: background-color 0.2s ease;
+  }
+  
+  .product-row:hover {
+    background-color: var(--neutral-light);
+  }
+  
+  .product-row td {
+    vertical-align: middle;
+    padding: 1rem;
+  }
+  
+  .product-img-small img {
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .product-img-placeholder {
+    width: 50px;
+    height: 50px;
+    background-color: var(--neutral);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-light);
+    font-size: 1.5rem;
+  }
+  
+  .badge {
+    padding: 0.5em 0.8em;
+    border-radius: 6px;
+    font-weight: 500;
+  }
+  
+  .bg-info {
+    background-color: var(--accent) !important;
+    color: white;
+  }
+  
+  .quantity-badge {
+    padding: 0.4em 0.8em;
+    border-radius: 6px;
+    color: white;
+    font-weight: 600;
+  }
+  
+  /* Empty state styling */
+  .empty-state {
+    padding: 2rem;
+    text-align: center;
+  }
+  
+  .empty-icon {
+    font-size: 3rem;
+    color: var(--text-light);
+    margin-bottom: 1rem;
+  }
+  
+  /* Modal Styling */
+  .modal-content {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  }
+  
+  .modal-header {
+    background-color: var(--primary);
+    color: white;
+    border-bottom: none;
+  }
+  
+  .modal-footer {
+    border-top: none;
+    padding: 1rem 2rem 2rem;
+  }
+  
+  /* Delete warning icon */
+  .delete-warning-icon {
+    font-size: 3rem;
+    color: var(--danger);
+  }
+  
+  /* Image preview */
+  .image-preview img {
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Animations */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes slideIn {
+    from { transform: translateX(-20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  
+  @keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  
+  .fade-in {
+    animation: fadeIn 0.8s ease forwards;
+  }
+  
+  .slide-in {
+    animation: slideIn 0.8s ease forwards;
+  }
+  
+  .slide-up {
+    animation: slideUp 0.8s ease forwards;
+  }
+</style>
+
+<!-- Add required Bootstrap Icons CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css">
+
+<!-- Add Custom Google Font -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Custom Scripts for Enhanced Functionality -->
+<script>
+// Function to toggle GST percentage field visibility in edit modal
+function toggleEditGstField() {
+  const isTaxableValue = document.getElementById('edit_is_taxable').value;
+  const gstContainer = document.getElementById('edit_gst_percentage_container');
+  gstContainer.style.display = (isTaxableValue === 'True') ? 'block' : 'none';
+}
+
+// Function to toggle GST percentage field visibility in add product form
+function toggleGstField() {
+  const isTaxableValue = document.getElementById('is_taxable').value;
+  const gstField = document.getElementById('gst-field');
+  gstField.style.display = (isTaxableValue === 'True') ? 'block' : 'none';
+}
+
+// Debug function to watch for taxable/GST issues
+function debugGstValues() {
+  console.log('--- GST Debug Info ---');
+  const taxableValue = document.getElementById('edit_is_taxable').value;
+  const gstContainer = document.getElementById('edit_gst_percentage_container');
+  const gstValue = document.getElementById('edit_gst_percentage').value;
+  
+  console.log('Taxable Value:', taxableValue);
+  console.log('GST Container Display:', gstContainer.style.display);
+  console.log('GST Value:', gstValue);
+}
+
+// Edit Product Modal Functionality
+const editProductModal = document.getElementById('editProductModal');
+editProductModal.addEventListener('show.bs.modal', function (event) {
+  const button = event.relatedTarget;
+
+  const productId = button.getAttribute('data-product-id');
+  const productName = button.getAttribute('data-product-name');
+  const productCategory = button.getAttribute('data-product-category');
+  const productPrice = button.getAttribute('data-product-price');
+  const productDescription = button.getAttribute('data-product-description');
+  const productQuantity = button.getAttribute('data-product-quantity');
+  const productImage = button.getAttribute('data-product-image');
+
+  // GST and taxable attributes
+  const productGst = button.getAttribute('data-product-gst');
+  const productTaxable = button.getAttribute('data-product-taxable');
+
+  // NEW: Brand and Size attributes
+  const productBrand = button.getAttribute('data-product-brand') || '';
+  const productSize = button.getAttribute('data-product-size') || '';
+
+  // Modal input fields
+  const modalProductId = editProductModal.querySelector('#product_id');
+  const modalProductName = editProductModal.querySelector('#edit_name');
+  const modalProductCategory = editProductModal.querySelector('#edit_category');
+  const modalProductPrice = editProductModal.querySelector('#edit_price');
+  const modalProductDescription = editProductModal.querySelector('#edit_description');
+  const modalProductQuantity = editProductModal.querySelector('#edit_quantity');
+  const modalProductImagePreview = editProductModal.querySelector('#edit_image_preview');
+  const modalProductGst = editProductModal.querySelector('#edit_gst_percentage');
+  const modalProductTaxable = editProductModal.querySelector('#edit_is_taxable');
+
+  // NEW modal inputs for brand and size
+  const modalProductBrand = editProductModal.querySelector('#edit_brand');
+  const modalProductSize = editProductModal.querySelector('#edit_size');
+
+  modalProductId.value = productId;
+  modalProductName.value = productName;
+  modalProductCategory.value = productCategory;
+  modalProductPrice.value = productPrice;
+  modalProductDescription.value = productDescription;
+  modalProductQuantity.value = productQuantity;
+
+  // Set brand and size values
+  modalProductBrand.value = productBrand;
+  modalProductSize.value = productSize;
+
+  // For debugging
+  console.log('Modal opening with values:', {
+    productId,
+    productName,
+    productGst,
+    productTaxable,
+    productBrand,
+    productSize,
+  });
+
+  // Set taxable value
+  if (productTaxable === 'True' || productTaxable === 'true' || productTaxable === '1') {
+    modalProductTaxable.value = 'True';
+  } else {
+    modalProductTaxable.value = 'False';
+  }
+
+  // Set GST percentage and toggle visibility
+  setTimeout(() => {
+    toggleEditGstField();
+
+    if (productGst && productGst !== 'None' && productGst !== 'null') {
+      modalProductGst.value = productGst;
+    } else {
+      modalProductGst.value = '';
+    }
+
+    // For debugging
+    debugGstValues?.();
+  }, 100);
+
+  // Add onchange listener to taxable dropdown to toggle GST field
+  modalProductTaxable.onchange = toggleEditGstField;
+
+  // Display image preview with animation
+  if (productImage && productImage !== "''") {
+    modalProductImagePreview.innerHTML = `
+      <img src="${productImage}" class="img-thumbnail mt-2 fade-in" style="max-width: 100%; border-radius: 10px;">
+    `;
+  } else {
+    modalProductImagePreview.innerHTML = `
+      <div class="text-center text-muted mt-3 fade-in">
+        <i class="bi bi-image" style="font-size: 3rem;"></i>
+        <p>No image available</p>
+      </div>
+    `;
+  }
+});
+
+// Delete Product Modal Functionality
+const deleteProductModal = document.getElementById('deleteProductModal');
+if (deleteProductModal) {
+  deleteProductModal.addEventListener('show.bs.modal', function (event) {
+    const button = event.relatedTarget;
+    const productId = button.getAttribute('data-product-id');
+    const productName = button.getAttribute('data-product-name');
+
+    // Set product name in the modal
+    document.getElementById('product-name').textContent = productName;
+
+    // Set the form action URL to delete the product
+    const form = document.getElementById('delete-product-form');
+    form.action = '/products/delete/' + productId + '/';
+  });
+}
+
+// Search functionality for product table
+document.addEventListener('DOMContentLoaded', function() {
+  const searchInput = document.getElementById('productSearch');
+  if (searchInput) {
+    searchInput.addEventListener('keyup', function() {
+      const searchTerm = this.value.toLowerCase();
+      const rows = document.querySelectorAll('.product-row');
+
+      rows.forEach(row => {
+        const productName = row.querySelector('strong').textContent.toLowerCase();
+        const productDescription = row.querySelector('small').textContent.toLowerCase();
+        const category = row.querySelector('.badge').textContent.toLowerCase();
+
+        if (productName.includes(searchTerm) || productDescription.includes(searchTerm) || category.includes(searchTerm)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    });
+  }
+  
+  // Initialize toggle functions on page load
+  const isTaxableSelect = document.getElementById('is_taxable');
+  if (isTaxableSelect) {
+    toggleGstField();
+    isTaxableSelect.addEventListener('change', toggleGstField);
+  }
+});
+
+// Add beautiful image preview for the file input
+document.addEventListener('DOMContentLoaded', function() {
+  const imageInput = document.getElementById('image');
+  if (imageInput) {
+    imageInput.addEventListener('change', function() {
+      const file = this.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const previewContainer = document.querySelector('.image-preview');
+          if (previewContainer) {
+            previewContainer.innerHTML = `
+              <img src="${e.target.result}" alt="Product Image Preview" class="img-thumbnail mt-2 fade-in" style="max-width: 200px; border-radius: 10px;">
+            `;
+          } else {
+            const newPreviewContainer = document.createElement('div');
+            newPreviewContainer.className = 'image-preview mt-2 fade-in';
+            newPreviewContainer.innerHTML = `
+              <img src="${e.target.result}" alt="Product Image Preview" class="img-thumbnail" style="max-width: 200px; border-radius: 10px;">
+            `;
+            imageInput.parentNode.appendChild(newPreviewContainer);
+          }
+        }
+        reader.readAsDataURL(file);
+      }
+    });
+  }
+
+  const editImageInput = document.getElementById('edit_image');
+  if (editImageInput) {
+    editImageInput.addEventListener('change', function() {
+      const file = this.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const previewContainer = document.getElementById('edit_image_preview');
+          previewContainer.innerHTML = `
+            <img src="${e.target.result}" alt="Product Image Preview" class="img-thumbnail mt-2 fade-in" style="max-width: 100%; border-radius: 10px;">
+          `;
+        }
+        reader.readAsDataURL(file);
+      }
+    });
+  }
+});
+
+// Add subtle animations when the page loads
+document.addEventListener('DOMContentLoaded', function() {
+  // Add staggered animation to table rows
+  const rows = document.querySelectorAll('.product-row');
+  rows.forEach((row, index) => {
+    row.style.opacity = '0';
+    row.style.animation = `fadeIn 0.5s ease forwards ${0.1 + index * 0.05}s`;
+  });
+});
+</script>
+
+<!-- Custom Script to enhance mobile responsiveness -->
+<script>
+  // Make table more responsive on small screens
+  document.addEventListener('DOMContentLoaded', function() {
+    function adjustTableForMobile() {
+      const windowWidth = window.innerWidth;
+      const table = document.querySelector('.product-table');
+      
+      if (windowWidth < 768) {
+        // Better mobile view of product details
+        const productInfoCells = document.querySelectorAll('.product-info');
+        productInfoCells.forEach(cell => {
+          cell.classList.remove('d-flex');
+          cell.classList.add('d-grid');
+          cell.style.gridTemplateColumns = 'auto 1fr';
+          cell.style.gap = '10px';
+          cell.style.alignItems = 'center';
+        });
+        
+        // Ensure images are visible and properly sized
+        const productImages = document.querySelectorAll('.product-img-small img');
+        productImages.forEach(img => {
+          img.style.width = '50px';
+          img.style.height = '50px';
+          img.style.objectFit = 'cover';
+          img.style.display = 'block';
+        });
+      } else {
+        // Reset styles for larger screens
+        const productInfoCells = document.querySelectorAll('.product-info');
+        productInfoCells.forEach(cell => {
+          cell.classList.add('d-flex');
+          cell.classList.remove('d-grid');
+          cell.style.gridTemplateColumns = '';
+          cell.style.gap = '';
+        });
+      }
+    }
+    
+    // Run on page load
+    adjustTableForMobile();
+    
+    // Run when window is resized
+    window.addEventListener('resize', adjustTableForMobile);
+  });
+</script>
+{% endblock %}

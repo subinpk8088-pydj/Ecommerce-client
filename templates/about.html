@@ -1,0 +1,270 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- AOS CSS -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
+<!-- AOS JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+<script>
+  AOS.init({ once: true, duration: 1000 });
+</script>
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+  body {
+    font-family: 'Nunito', sans-serif;
+    background-color: #fafafa;
+  }
+
+  .section-title {
+    font-weight: 700;
+    font-size: 32px;
+    color: #7c5295;
+    border-bottom: 4px solid #b388d8;
+    display: inline-block;
+    margin-bottom: 40px;
+    padding-bottom: 10px;
+  }
+
+  .about-section {
+    background-color: #fdfbff;
+    padding: 60px 0;
+  }
+
+  .about-card {
+    background: #ffffff;
+    border-left: 5px solid #7c5295;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px rgba(124, 82, 149, 0.1);
+    transition: all 0.4s ease;
+  }
+
+  .about-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 14px 30px rgba(124, 82, 149, 0.2);
+  }
+
+  .about-heading {
+    font-size: 24px;
+    font-weight: 700;
+    color: #5e3370;
+    margin-bottom: 15px;
+  }
+
+  .about-content {
+    font-size: 16px;
+    color: #6d6d6d;
+    line-height: 1.8;
+  }
+
+  .about-icon {
+    font-size: 36px;
+    color: #7c5295;
+    margin-bottom: 20px;
+  }
+
+  .btn-purple {
+    background-color: #7c5295;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    transition: background-color 0.3s ease;
+  }
+
+  .btn-purple:hover {
+    background-color: #6a3d85;
+  }
+
+  .timeline {
+    position: relative;
+    padding-left: 40px;
+    margin-top: 20px;
+    border-left: 3px solid #b388d8;
+  }
+
+  .timeline-item {
+    margin-bottom: 30px;
+    position: relative;
+  }
+
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -10px;
+    top: 5px;
+    width: 16px;
+    height: 16px;
+    background-color: #7c5295;
+    border-radius: 50%;
+    border: 2px solid #fff;
+  }
+
+  .team-card {
+    text-align: center;
+    padding: 25px;
+    background-color: #fff;
+    border-radius: 16px;
+    box-shadow: 0 10px 20px rgba(124, 82, 149, 0.1);
+    transition: transform 0.3s;
+  }
+
+  .team-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(124, 82, 149, 0.2);
+  }
+
+  .team-photo {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 15px;
+    border: 4px solid #b388d8;
+  }
+
+  .team-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: #5e3370;
+  }
+
+  .team-role {
+    font-size: 14px;
+    color: #888;
+  }
+
+  @media (max-width: 768px) {
+    .section-title {
+      font-size: 26px;
+    }
+
+    .about-heading {
+      font-size: 20px;
+    }
+
+    .about-content {
+      font-size: 15px;
+    }
+
+    .team-card {
+      margin-bottom: 30px;
+    }
+  }
+</style>
+
+<section class="about-section" data-aos="fade-up">
+  <div class="container">
+    <h2 class="text-center section-title">About Us</h2>
+
+    <!-- Company Overview -->
+    <div class="about-card mb-4" data-aos="fade-up" data-aos-delay="100">
+      <div class="text-center">
+        <i class="bi bi-people-fill about-icon"></i>
+        <div class="about-heading">Who We Are</div>
+        <p class="about-content">
+          CarePlus is a forward-thinking hygiene products company focused on sustainability, health, and community impact. Our team is dedicated to creating eco-friendly, effective, and affordable solutions for personal and public hygiene.
+        </p>
+      </div>
+    </div>
+
+    <!-- Mission, Vision, Values -->
+    <div class="row g-4">
+      <div class="col-md-4" data-aos="fade-up" data-aos-delay="150">
+        <div class="about-card h-100">
+          <i class="bi bi-bullseye about-icon d-block text-center"></i>
+          <div class="about-heading text-center">Mission</div>
+          <p class="about-content text-center">
+            To deliver hygiene solutions that improve lives and protect the planet, one product at a time.
+          </p>
+        </div>
+      </div>
+      <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+        <div class="about-card h-100">
+          <i class="bi bi-eye about-icon d-block text-center"></i>
+          <div class="about-heading text-center">Vision</div>
+          <p class="about-content text-center">
+            A cleaner, healthier world where everyone has access to essential hygiene tools.
+          </p>
+        </div>
+      </div>
+      <div class="col-md-4" data-aos="fade-up" data-aos-delay="250">
+        <div class="about-card h-100">
+          <i class="bi bi-stars about-icon d-block text-center"></i>
+          <div class="about-heading text-center">Values</div>
+          <p class="about-content text-center">
+            Innovation, Integrity, Sustainability, and Community — these guide every decision we make.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="mt-5" data-aos="fade-up" data-aos-delay="300">
+      <h3 class="about-heading text-center">Our Journey</h3>
+      <div class="timeline mt-4">
+        <div class="timeline-item">
+          <strong>2018 </strong>– CarePlus founded with a vision to transform hygiene.
+
+        </div>
+        <div class="timeline-item">
+          <strong>2020</strong> – Launched first eco-friendly wipes line.
+        </div>
+        <div class="timeline-item">
+          <strong>2022</strong> – Reached 1 million customers across 10+ countries.
+        </div>
+        <div class="timeline-item">
+          <strong>2024</strong> – Partnered with HealthAid Foundation to distribute hygiene kits globally.
+        </div>
+      </div>
+    </div>
+
+    <!-- Team Section -->
+    <div class="mt-5" data-aos="fade-up" data-aos-delay="400">
+      <h3 class="about-heading text-center mb-4">Meet the Team</h3>
+      <div class="row g-4 justify-content-center">
+        <div class="col-md-3 col-sm-6" data-aos="fade-up" data-aos-delay="100">
+          <div class="team-card">
+            <img src="{% static 'images/team1.jpeg' %}" alt="Alice" class="team-photo">
+            <div class="team-name">Alice Mathews</div>
+            <div class="team-role">CEO & Founder</div>
+          </div>
+        </div>
+        <div class="col-md-3 col-sm-6" data-aos="fade-up" data-aos-delay="200">
+          <div class="team-card">
+            <img src="{% static 'images/team2.webp' %}" alt="Daniel" class="team-photo">
+            <div class="team-name">Daniel Kim</div>
+            <div class="team-role">Chief Product Officer</div>
+          </div>
+        </div>
+        <div class="col-md-3 col-sm-6" data-aos="fade-up" data-aos-delay="300">
+          <div class="team-card">
+            <img src="{% static 'images/team3.jpg' %}" alt="Sophia" class="team-photo">
+            <div class="team-name">Sophia Lee</div>
+            <div class="team-role">Marketing Director</div>
+          </div>
+        </div>
+        <div class="col-md-3 col-sm-6" data-aos="fade-up" data-aos-delay="400">
+          <div class="team-card">
+            <img src="{% static 'images/team4.avif' %}" alt="Michael" class="team-photo">
+            <div class="team-name">Michael Torres</div>
+            <div class="team-role">Operations Head</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact CTA -->
+    <div class="text-center mt-5" data-aos="fade-up" data-aos-delay="500">
+      <a href="#" class="btn btn-purple">Get in Touch</a>
+    </div>
+  </div>
+</section>
+{% endblock %}
