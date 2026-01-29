@@ -66,3 +66,43 @@ Designed to feel like a **real commercial e-commerce website**, not a basic demo
 
 ## 🧩 Project Structure (Simplified)
 
+
+
+---
+
+## 🔐 User Roles & Access
+
+- **Users:** Register, browse products, manage wishlist, submit ratings
+- **Admin:** Full control over users, products, categories, and content
+- **Access Control:** Role-based access enforced via separate admin area
+
+---
+
+## 🎯 Use Cases
+
+- Portfolio Showcase Project
+- Modern E-Commerce UI Reference
+- Academic / Final-Year Project
+- Base for Full-Stack E-Commerce System
+- Startup-style Product Demo
+
+---
+
+## 🚀 Future Enhancements
+
+- Backend integration with Django
+- Cart & order management
+- Payment gateway integration
+- User profiles & order history
+- Email notifications
+- Sales analytics & reports
+
+---
+
+## 👨‍💻 Author
+
+**Subin PK**  
+Python Django Developer  
+
+🔗 GitHub: https://github.com/subinpk8088-pydj
+
