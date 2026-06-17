@@ -140,5 +140,5 @@ EMAIL_HOST = 'smtp.gmail.com'  # Use your email provider
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'subinsuresh8088@gmail.com'
-EMAIL_HOST_PASSWORD = 'nquq hhgd vkpm qwlk'  # Use app password for security
+EMAIL_HOST_PASSWORD = 'aqhv npww pzyi rjll'  # Use app password for security
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
